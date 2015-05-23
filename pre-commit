@@ -1,0 +1,180 @@
+#!/usr/bin/env hy
+
+(def *version* "0.0.2")
+(import os re subprocess sys)
+
+; pccs (pre-commit configs) should be a directory under your .git
+; where you store the RCs for your various linters.  If you want to
+; use a global one, you'll have to edit the configuration entries
+; below.
+
+(def *config-path* (os.path.join (.get os.environ "GIT_DIR" "./.git") "pccs"))
+(def *modified* (.compile re "^[MA]\s+(?P<name>.*)$"))
+
+(def *checks* 
+  [
+;   {
+;    "output" "Checking for debugger commands in Javascript..."
+;    "command" "grep -n debugger {filename}"
+;    "match_files" [".*\.js$"]
+;    "print_filename" True
+;    "error_condition" "output"
+;    }
+   {
+    "output" "Running Jshint..."
+    "command" "jshint -c {config_path}/jshint.rc {filename}"
+    "match_files" [".*\.js$"]
+    "print_filename" False
+    "error_condition" "error"
+    }
+   {
+    "output" "Running Coffeelint..."
+    "command" "coffeelint {filename}"
+    "match_files" [".*\.coffee$"]
+    "print_filename" False
+    "error_condition" "error"
+    }
+   {
+    "output" "Running JSCS..."
+    "command" "jscs -c {config_path}/jscs.rc {filename}"
+    "match_files" [".*\.js$"]
+    "print_filename" False
+    "error_condition" "error"
+    }
+   {
+    "output" "Running pep8..."
+    "command" "pep8 -r --ignore=E501,W293,W391 {filename}"
+    "match_files" [".*\.py$"]
+    "print_filename" False
+    "error_condition" "error"
+    }
+   {
+    "output" "Running xmllint..."
+    "command" "xmllint {filename}"
+    "match_files" [".*\.xml"]
+    "print_filename" False
+    "error_condition" "error"
+    }
+   ]
+  )
+
+(defn get-git [cmd]
+  (let [[fullcmd (+ ["git"] cmd)]
+        [process (subprocess.Popen fullcmd 
+                                   :stdout subprocess.PIPE 
+                                   :stderr subprocess.PIPE)]
+        [(, out err) (.communicate process)]]
+    (, out err process.returncode)))
+
+(defn call-git [cmd]
+  (let [[fullcmd (+ ["git"] cmd)]]
+    (subprocess.call fullcmd 
+                     :stdout subprocess.PIPE 
+                     :stderr subprocess.PIPE)))
+
+(defn get-cmd [cmd]
+  (let [[process (subprocess.Popen cmd 
+                                   :stdout subprocess.PIPE 
+                                   :stderr subprocess.PIPE 
+                                   :shell True)]
+        [(, out err) (.communicate process)]]
+    (, out err process.returncode)))
+
+(defn max-code [code-pairs]
+  (reduce (fn [m i] (if 
+                        (> (abs (get i 0)) (abs m)) 
+                      (get i 0) 
+                      m)) 
+          code-pairs 0))
+  
+(defn message-bodies [code-pairs]
+  (lmap (fn [i] (get i 1)) code-pairs))
+
+(defn matches-file [filename match-files]
+  (any (map (fn [match-file] (-> (.compile re match-file) 
+                                 (.match filename))) 
+            match-files)))
+
+; Hy is overeager to return an iterators which is consumed during
+; later traversal.  lmap returns a concrete list instead.
+
+(defn lmap (pred iter) (list (map pred iter)))
+
+(defn run-external-checker [filename check]
+  (let [[cmd (-> (get check "command") (.format 
+                                        :filename filename 
+                                        :config_path *config-path*))]
+        [(, out err returncode) (get-cmd cmd)]]
+    (if (or (and out (= (.get check "error_condition" "error") "output")) 
+            err 
+            (not (= returncode 0)))
+      (let [[prefix (if (get check "print_filename") 
+                      (.format "\t{}:" filename) 
+                      "\t")]
+            [output (+ 
+                     (lmap (fn [line] (.format "{}{}" prefix (.decode line "utf-8"))) 
+                           (.splitlines out))
+                     (if err [err] []))]]
+        [(or returncode 1) output])
+      [0 []])))
+
+(defn check-file [filename check]
+  (cond [(and (in "match_files" check) 
+              (not (matches-file filename (get check "match_files")))) [0 []] ]
+        [(and (in "ignore_files" check) 
+              (matches-file filename (get check "ignore_files"))) [0 []] ]
+        [true (run-external-checker filename check)]))
+
+(defn check-files [filenames check]
+  (let [[scan-results (lmap 
+                       (fn [filename] (check-file filename check)) filenames)]
+        [messages (+ [(get check "output")] (message-bodies scan-results))]]
+    [(max-code scan-results) messages]))
+
+(defn get-all-files []
+  (let [[build-filenames 
+         (fn [filenames] 
+           (map 
+            (fn [f] (os.path.join (get filenames 0) f)) (get filenames 2)))]]
+    (flatten (list-comp (build-filenames o) [o (.walk os ".")]))))
+
+; I removed the originally recommended "-u" command from stash; it was
+; "cleaning up" far too zealously, deleting my node_modules directory
+
+(defn get-some-files [against]
+  (let [[(, out err returncode) 
+         (get-git ["diff-index" "--name-status" against])]
+        [lines (.splitlines out)]
+        [matcher (fn [line] (.match *modified* (.decode line "utf-8")))]]
+    (filter 
+     (fn [x] (not (= x "")))
+     (list-comp (.group match "name") [match (map matcher lines)] match))))
+
+(defn scan [all-files against]
+  (do 
+    (call-git ["stash" "--keep-index"])
+    (let [[toscan 
+           (list (if all-files (get-all-files) (get-some-files against)))]
+          [check-results 
+           (lmap (fn [check] (check-files toscan check)) *checks*)]
+          [exit-code (max-code check-results)]
+          [messages (flatten (message-bodies check-results))]]
+      (do
+        (for [line messages] (print line))
+        (call-git ["reset" "--hard"])
+        (call-git ["stash" "pop" "--quiet" "--index"])
+        exit-code))))
+
+; That magic number below is what git requires when the repository is
+; completely empty.
+
+(defn get-head-tag []
+  (let [[(, out err returncode) (get-git ["rev-parse" "--verify HEAD"])]]
+    (if err "4b825dc642cb6eb9a060e54bf8d69288fbee4904" "HEAD")))
+
+(defmain [&rest args]
+  (sys.exit 
+   (scan 
+    (and (> (len args) 1) 
+         (= (get args 2) "--all-files")) 
+    (get-head-tag))))
