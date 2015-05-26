@@ -58,7 +58,7 @@
    ]
   )
 
-(defn get-git [cmd]
+(defn get-git-value [cmd]
   (let [[fullcmd (+ ["git"] cmd)]
         [process (subprocess.Popen fullcmd 
                                    :stdout subprocess.PIPE 
@@ -66,28 +66,26 @@
         [(, out err) (.communicate process)]]
     (, out err process.returncode)))
 
-(defn call-git [cmd]
+(defn run-git-command [cmd]
   (let [[fullcmd (+ ["git"] cmd)]]
     (subprocess.call fullcmd 
                      :stdout subprocess.PIPE 
                      :stderr subprocess.PIPE)))
 
-(defn get-cmd [cmd]
-  (let [[process (subprocess.Popen cmd 
+(defn get-shell-value [fullcmd]
+  (let [[process (subprocess.Popen fullcmd 
                                    :stdout subprocess.PIPE 
                                    :stderr subprocess.PIPE 
                                    :shell True)]
         [(, out err) (.communicate process)]]
     (, out err process.returncode)))
 
-(defn max-code [code-pairs]
-  (reduce (fn [m i] (if 
-                        (> (abs (get i 0)) (abs m)) 
-                      (get i 0) 
-                      m)) 
-          code-pairs 0))
+(defn derive-max-code [code-pairs]
+  (reduce 
+   (fn [m i] (if (> (abs (get i 0)) (abs m)) (get i 0) m)) 
+   code-pairs 0))
   
-(defn message-bodies [code-pairs]
+(defn derive-message-bodies [code-pairs]
   (lmap (fn [i] (get i 1)) code-pairs))
 
 (defn matches-file [filename match-files]
@@ -104,7 +102,7 @@
   (let [[cmd (-> (get check "command") (.format 
                                         :filename filename 
                                         :config_path *config-path*))]
-        [(, out err returncode) (get-cmd cmd)]]
+        [(, out err returncode) (get-shell-value cmd)]]
     (if (or (and out (= (.get check "error_condition" "error") "output")) 
             err 
             (not (= returncode 0)))
@@ -118,63 +116,68 @@
         [(or returncode 1) output])
       [0 []])))
 
-(defn check-file [filename check]
+(defn check-scan-wanted [filename check]
   (cond [(and (in "match_files" check) 
-              (not (matches-file filename (get check "match_files")))) [0 []] ]
+              (not (matches-file filename (get check "match_files")))) false]
         [(and (in "ignore_files" check) 
-              (matches-file filename (get check "ignore_files"))) [0 []] ]
-        [true (run-external-checker filename check)]))
+              (matches-file filename (get check "ignore_files"))) false]
+        [true true]))
 
 (defn check-files [filenames check]
-  (let [[scan-results (lmap 
-                       (fn [filename] (check-file filename check)) filenames)]
-        [messages (+ [(get check "output")] (message-bodies scan-results))]]
-    [(max-code scan-results) messages]))
+  (let [[filenames-to-check 
+         (lmap (fn [filename] (check-scan-wanted filename check)) filenames)]
+        [scan-results
+         (lmap (fn [filename] 
+                 (run-external-checker filename check)) filenames-to-check)]
+        [messages (+ [(get check "output")] (derive-message-bodies scan-results))]]
+    [(derive-max-code scan-results) messages]))
 
-(defn get-all-files []
+(defn gather-all-filenames []
   (let [[build-filenames 
          (fn [filenames] 
            (map 
             (fn [f] (os.path.join (get filenames 0) f)) (get filenames 2)))]]
-    (flatten (list-comp (build-filenames o) [o (.walk os ".")]))))
+    (list (flatten (list-comp (build-filenames o) [o (.walk os ".")])))))
 
 ; I removed the originally recommended "-u" command from stash; it was
 ; "cleaning up" far too zealously, deleting my node_modules directory
 
-(defn get-some-files [against]
+(defn gather-staged-filenames [against]
   (let [[(, out err returncode) 
-         (get-git ["diff-index" "--name-status" against])]
+         (get-git-value ["diff-index" "--name-status" against])]
         [lines (.splitlines out)]
         [matcher (fn [line] (.match *modified* (.decode line "utf-8")))]]
-    (filter 
+    (list (filter 
      (fn [x] (not (= x "")))
-     (list-comp (.group match "name") [match (map matcher lines)] match))))
+     (list-comp (.group match "name") [match (map matcher lines)] match)))))
 
-(defn scan [all-files against]
+(defn scan-files [scan-all-files against]
   (do 
-    (call-git ["stash" "--keep-index"])
-    (let [[toscan 
-           (list (if all-files (get-all-files) (get-some-files against)))]
-          [check-results 
-           (lmap (fn [check] (check-files toscan check)) *checks*)]
-          [exit-code (max-code check-results)]
-          [messages (flatten (message-bodies check-results))]]
-      (do
-        (for [line messages] (print line))
-        (call-git ["reset" "--hard"])
-        (call-git ["stash" "pop" "--quiet" "--index"])
-        exit-code))))
-
-; That magic number below is what git requires when the repository is
-; completely empty.
-
+   (run-git-command ["stash" "--keep-index"])
+   (let [[filenames-to-scan 
+          (if scan-all-files 
+            (gather-all-filenames) 
+            (gather-staged-filenames against))]
+         [results-of-scan
+<<<<<<< Updated upstream
+          (lmap (fn [check] (check-files filenames-to-scan check)) *checks*)]
+=======
+          (lmap (fn [check] (scan-files filenames-to-scan check)) *checks*)]
+>>>>>>> Stashed changes
+         [exit-code (derive-max-code results-of-scan)]
+         [messages (flatten (derive-message-bodies results-of-scan))]]
+     (do
+      (for [line messages] (print line))
+      (run-git-command ["reset" "--hard"])
+      (run-git-command ["stash" "pop" "--quiet" "--index"])
+      exit-code))))
+  
 (defn get-head-tag []
-  (let [[(, out err returncode) (get-git ["rev-parse" "--verify HEAD"])]]
-    (if err "4b825dc642cb6eb9a060e54bf8d69288fbee4904" "HEAD")))
+  (let [[empty-repository-hash "4b825dc642cb6eb9a060e54bf8d69288fbee4904"]
+        [(, out err returncode) (get-git-value ["rev-parse" "--verify HEAD"])]]
+    (if err empty-repository-hash "HEAD")))
 
 (defmain [&rest args]
-  (sys.exit 
-   (scan 
-    (and (> (len args) 1) 
-         (= (get args 2) "--all-files")) 
-    (get-head-tag))))
+  (let [[scan-all-files (and (> (len args) 1) (= (get args 2) "--all-files"))]]
+    (sys.exit (scan-files scan-all-files (get-head-tag)))))
+
