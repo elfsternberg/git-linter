@@ -159,7 +159,11 @@
             (gather-all-filenames) 
             (gather-staged-filenames against))]
          [results-of-scan
+<<<<<<< Updated upstream
           (lmap (fn [check] (check-files filenames-to-scan check)) *checks*)]
+=======
+          (lmap (fn [check] (scan-files filenames-to-scan check)) *checks*)]
+>>>>>>> Stashed changes
          [exit-code (derive-max-code results-of-scan)]
          [messages (flatten (derive-message-bodies results-of-scan))]]
      (do
