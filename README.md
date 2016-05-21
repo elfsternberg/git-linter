@@ -32,5 +32,6 @@ git repository to its original pre-stash state.  Learn to use the
 following commands correctly:
 
 `git stash list`
+
 `git stash pop`
 
