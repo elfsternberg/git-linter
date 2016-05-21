@@ -123,8 +123,6 @@
               (matches-file filename (get check "ignore_files"))) false]
         [true true]))
 
-(defn tap [x] (print x) x)
-
 (defn check-files [filenames check]
   (let [[filenames-to-check
          (filter (fn [filename] (check-scan-wanted filename check)) filenames)]
@@ -180,4 +178,4 @@
 
 (defmain [&rest args]
   (let [[scan-all-files (and (> (len args) 1) (= (get args 2) "--all-files"))]]
-    (sys.exit (run-checks-for scan-all-files (get-head-tag)))))
+    (sys.exit (int (run-checks-for scan-all-files (get-head-tag))))))
