@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+
+# This Python file is a hand-edited version of the Hy version.  It has
+# the exact same functionality, but I recommend using the Hy version
+# if you can, as it's the one I'm actively maintaining.
+
 VERSION = '0.0.2'
 import os
 import re
