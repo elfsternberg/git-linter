@@ -31,6 +31,6 @@ If, while installing this, you encounter a problem, you must return your
 git repository to its original pre-stash state.  Learn to use the
 following commands correctly:
 
-git stash list
-git stash pop
+`git stash list`
+`git stash pop`
 
