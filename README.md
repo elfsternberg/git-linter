@@ -10,11 +10,14 @@ you attempt to commit a collection of files, running the configured list
 of linters against those files, and will terminate the check-in if any
 of the files fails.
 
-pre-commit uses the git-stash to temporarily store any changes you may
-have made between your "git-add" and your "git-commit"; it therefore
-checks against your *staged* files, not your *workspace* files.  Most
-hooks do the wrong thing and assume your stage and workspace are the
-same.  This is not necessarily so.
+pre-commit uses the `git-stash` command to temporarily store any changes
+you may have made between your `git-add` and your `git-commit`; it
+therefore checks against your *staged* files, not your *workspace*
+files.  Most hooks do the wrong thing and assume your stage and
+workspace are the same.  This is not necessarily so.  This has the
+unfortunate side-effect of touching every file if things should fail,
+which may confuse your IDE.  I haven't quite figured out how to deal
+with that.
 
 pre-commit is written in Hy, a Lisp-like dialect of Python.  I find Hy's
 support for "cond", complex anonymous functions, and complex return
