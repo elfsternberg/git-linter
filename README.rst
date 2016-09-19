@@ -44,13 +44,13 @@ Disclaimer
 
 This software, including provided configuration and documentation
 materials, is provided "as is" without any warranties, including any
-implied warranties of merchantability, fitness, performance, or quality.
-In no event shall the author or sponsor be liable for any special,
-direct, indirect, or consequential damages or any damages whatsoever
-resulting from loss of use, data or profits, whether in an action of
-contract, negligence or other tortious action, arising out of or in
-connection with the use or performance of this software.  Each user of
-this program Each user of the program will agree and understand, and be
-deemed to have agreed and understood, that there is no warranty
-whatsoever for the program and, accordingly, the entire risk arising
-from or otherwise connected with the program is assumed by the user.
+implied warranties of merchantability, fitness, performance, or
+quality.  In no event shall the author or sponsor be liable for any
+special, direct, indirect, or consequential damages or any damages
+whatsoever resulting from loss of use, data or profits, whether in an
+action of contract, negligence or other tortious action, arising out
+of or in connection with the use or performance of this software.
+Each user of the program will agree and understand, and be deemed to
+have agreed and understood, that there is no warranty whatsoever for
+the program and, accordingly, the entire risk arising from or
+otherwise connected with the program is assumed by the user.
