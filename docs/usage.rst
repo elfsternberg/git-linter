@@ -19,7 +19,7 @@ Options
     Version info
 
 ``-c`` ``--config``
-    Specify config file (default: ``$GIT_DIR/.git/git_lint/config``)
+    Specify config file (default: ``$GIT_DIR/.git-lint``)
 
 ``-w`` ``--workspace``
     Check workspace [default]
