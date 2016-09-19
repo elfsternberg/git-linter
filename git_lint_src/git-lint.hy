@@ -1,14 +1,67 @@
 #!/usr/bin/env hy
-
+(import os re subprocess sys gettext)
 (def *version* "0.0.2")
-(import os re subprocess sys)
+(def _ gettext.gettext)
 
-; pccs (pre-commit configs) should be a directory under your .git
-; where you store the RCs for your various linters.  If you want to
-; use a global one, you'll have to edit the configuration entries
-; below.
+; 0: Short opt, 1: long opt, 2: takes argument, 3: help text
+(def optlist [["o" "only" true (_ "A comma-separated list of only those linters to run") ["x"]]
+              ["x" "exclude" true (_ "A comma-separated list of linters to skip") []]
+              ["b" "base" false (_ "Check all changed files in the repository, not just those in the current directory.") []]
+              ["a" "all" false (_ "Scan all files in the repository, not just those that have changed.")]
+              ["w" "workspace" false (_ "Scan the workspace") ["s"]]
+              ["s" "staging" false (_ "Scan the staging area (pre-commit).") []]
+              ["g" "changes" false (_ "Report lint failures only for diff'd sections") ["l"]]
+              ["l" "complete" false (_ "Report lint failures for all files") []]
+              ["c" "config" true (_ "Path to config file") []]
+              ["h" "help" false (_ "This help message") []]
+              ["v" "version" false (_"Version information") []]])
 
-(def *config-path* (os.path.join (.get os.environ "GIT_DIR" "./.git") "pccs"))
+; Given a set of command-line arguments, compare that to a mapped
+; version of the optlist and return a canonicalized dictionary of all
+; the arguments that have been set.  For example "-c" and "--config"
+; will both be mapped to "config".
+
+; Given a prefix of one or two dashes and a position in the above
+; array, creates a function to map either the short or long option
+; to the option name.
+
+(defn make-opt-assoc [prefix pos]
+  (fn [acc it] (assoc acc (+ prefix (get it pos)) (get it 1)) acc)) 
+
+; Using the above, create a full map of all arguments, then return a
+; function ready to look up any argument and return the option name.  
+
+(defn make-options-rationalizer [optlist]
+  (let [
+        [short-opt-assoc (make-opt-assoc "-" 0)]
+        [long-opt-assoc (make-opt-assoc "--" 1)]
+        [fullset 
+         (ap-reduce (-> (short-opt-assoc acc it)
+                        (long-opt-assoc it)) optlist {})]]
+    (fn [acc it] (do (assoc acc (get fullset (get it 0)) (get it 1)) acc))))
+
+  
+  
+
+(defn print-version []
+  (print (.format "git-lint (hy version {})" *version*))
+  (print "Copyright (c) 2008, 2014 Kenneth M. \"Elf\" Sternberg <elf.sternberg@gmail.com>")
+  (sys.exit))
+
+(defn print-help []
+  (print "Usage: git lint [options] [filename]")
+  (ap-each optlist (print (.format "	-{}	--{}	{}" (get it 0) (get it 1) (get it 3))))
+  (sys.exit))
+
+; `lint` should be a directory under your .git where you store the RCs
+; for your various linters.  If you want to use a global one, you'll
+; have to edit the configuration entries below.
+
+(def *config-path*
+  
+
+  (os.path.join (.get os.environ "GIT_DIR" "./.git") "lint"))
+
 (def *git-modified-pattern* (.compile re "^[MA]\s+(?P<name>.*)$"))
 
 (def *checks*
@@ -179,3 +232,24 @@
 (defmain [&rest args]
   (let [[scan-all-files (and (> (len args) 1) (= (get args 2) "--all-files"))]]
     (sys.exit (int (run-checks-for scan-all-files (get-head-tag))))))
+
+(defmain [&rest args]
+  (try
+   (let [[optstringsshort 
+          (string.join (ap-map (+ (. it [0]) (cond [(. it [2]) ":"] [true ""])) optlist) "")]
+         [optstringslong 
+          (list (ap-map (+ (. it [1]) (cond [(. it [2]) "="] [true ""])) optlist))]
+         [(, opt arg) 
+          (getopt.getopt (slice args 1) optstringsshort optstringslong)]
+         [rationalize-options 
+          (make-options-rationalizer optlist)]
+         [options
+          (sanify-options (ap-reduce (rationalize-options acc it) opt {}))]]
+     
+
+     (cond [(.has_key options "help") (print-help)]
+           [(.has_key options "version") (print-version)]
+           [true (suggest options)]))
+   (catch [err getopt.GetoptError]
+     (print (str err))
+     (print-help))))
