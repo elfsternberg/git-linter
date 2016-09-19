@@ -1,0 +1,68 @@
+[DEFAULT]
+
+
+[debugging]
+output = Checking for debugger commands in Javascript...
+command = grep -n debugger {filename}
+files = [".*\.js$"]
+print =  True
+condition = output
+
+[jshint]
+output = Running Jshint...
+command = jshint -c {config_path}/jshint.rc {filename}
+match = [".*\.js$"]
+print = False
+condition = error
+
+[coffeelint]
+output = Running Coffeelint...
+command = coffeelint {filename}
+match = [".*\.coffee$"]
+print = False
+condition = error
+
+[jscs]
+output = Running JSCS...
+command = jscs -c {config_path}/jscs.rc {filename}
+match = [".*\.js$"]
+print = False
+condition = error
+
+[pep8]
+output = Running pep8...
+command = pep8 -r --ignore=E501,W293,W391 {filename}
+match = [".*\.py$"]
+print = False
+condition = error
+
+[xmllint]
+output = Running xmllint...
+command = xmllint {filename}
+match = [".*\.xml"]
+print = False
+condition = error
+
+[flake8]
+
+[csslint]
+output = Running eslint...
+command = csslint --quiet --config={filename}
+match = [".*\.js"]
+print = False
+condition = error
+
+[eslint]
+output = "Running eslint..."
+command = "eslint -c {filename}"
+match = [".*\.js"]
+print = False
+condition = error
+
+[jsonlint]
+output = "Running jsonlint..."
+command = "jsonlint -q -c {filename}"
+match = [".*\.json"]
+print = False
+condition = error
+

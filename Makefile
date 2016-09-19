@@ -49,15 +49,14 @@ lint:
 	flake8 git_lint tests
 
 test:
-py.test
+	py.test
 
 
 test-all:
 	tox
 
 coverage:
-coverage run --source git_lint py.test
-
+	coverage run --source git_lint py.test
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
