@@ -27,22 +27,25 @@ Options
 ``-s`` ``--staging``
     Check files in the staging area (useful as a pre-commit hook)
     
-``-a`` ``--all``
-    Check all files in repository, not just changed files
-
 ``-b`` ``--base``
     Run checks from your repository's root directory. By default,
     ``git-lint`` only runs from the current working directory.
+
+``-a`` ``--all``
+    Check all files in repository from the current directory, not
+    just changed files
+
+``-e`` ``--everything``
+   An alias for ``-b -a``, checks every file in the repository
     
 ``-o`` ``--only``
     Run only specific linters, skipping all others
     
 ``-e`` ``--exclude``
-    Exclude specific linters, running all others
+    Exclude specific linters, running all others    
 
-
-As a pre-commit hook
---------------------
+As a pre-commit hook:
+---------------------
 
     #!/usr/bin/env python
     import git_lint

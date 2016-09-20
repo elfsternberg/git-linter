@@ -1,68 +1,65 @@
-[DEFAULT]
-
-
 [debugging]
+comment = Check to Ensure no debugger commands get checked in
 output = Checking for debugger commands in Javascript...
-command = grep -n debugger {filename}
-files = [".*\.js$"]
+command = grep -n debugger
+files = .js
 print =  True
 condition = output
 
 [jshint]
 output = Running Jshint...
-command = jshint -c {config_path}/jshint.rc {filename}
-match = [".*\.js$"]
+command = jshint -c %(repdir)s/.git-lint/jshint.rc
+match = .js
 print = False
 condition = error
 
 [coffeelint]
 output = Running Coffeelint...
-command = coffeelint {filename}
-match = [".*\.coffee$"]
+command = coffeelint
+match = .coffee
 print = False
 condition = error
 
 [jscs]
 output = Running JSCS...
-command = jscs -c {config_path}/jscs.rc {filename}
-match = [".*\.js$"]
+command = jscs -c %(repdir)s/.git-lint/jscs.rc
+match = .js
 print = False
 condition = error
 
 [pep8]
+comment = PEP8 with some white space and line length checking turned off
 output = Running pep8...
-command = pep8 -r --ignore=E501,W293,W391 {filename}
-match = [".*\.py$"]
+command = pep8 -r --ignore=E501,W293,W391
+match = .py
 print = False
 condition = error
 
 [xmllint]
 output = Running xmllint...
-command = xmllint {filename}
-match = [".*\.xml"]
+command = xmllint
+match = .xml
 print = False
 condition = error
 
-[flake8]
-
 [csslint]
-output = Running eslint...
-command = csslint --quiet --config={filename}
-match = [".*\.js"]
+output = Running csslint...
+command = csslint --quiet
+match = .js
 print = False
 condition = error
 
 [eslint]
-output = "Running eslint..."
-command = "eslint -c {filename}"
-match = [".*\.js"]
+output = Running eslint...
+command = eslint
+match = .js
 print = False
 condition = error
 
 [jsonlint]
-output = "Running jsonlint..."
-command = "jsonlint -q -c {filename}"
-match = [".*\.json"]
+output = Running jsonlint...
+command = jsonlint -q
+match = .json
 print = False
 condition = error
 
