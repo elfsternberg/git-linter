@@ -45,7 +45,7 @@ condition = error
 [csslint]
 output = Running csslint...
 command = csslint --quiet
-match = .js
+match = .css
 print = False
 condition = error
 

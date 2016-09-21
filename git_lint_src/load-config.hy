@@ -1,65 +1,46 @@
 #!/usr/bin/env hy
 (import ConfigParser os subprocess operator re gettext sys getopt)
+(.append sys.path "Users/ksternberg/build/git-lint/git_lint_src")
+(import [git-lint-options [hyopt]])
+(import [git-lint-config [get-config]])
+
 (def _ gettext.gettext)
 (def *version* "0.0.2")
 
 (defn tap [a] (print "TAP:" a) a)
 
-(def optlist [["o" "only" true (_ "A comma-separated list of only those linters to run") ["x"]]
+                                        ; short-name long-name takes-args description precludes
+(def optlist [["o" "only" true (_ "A comma-separated list of only those linters to run") ["exclude"]]
               ["x" "exclude" true (_ "A comma-separated list of linters to skip") []]
               ["l" "linters" false (_ "Show the list of configured linters")]
               ["b" "base" false (_ "Check all changed files in the repository, not just those in the current directory.") []]
               ["a" "all" false (_ "Scan all files in the repository, not just those that have changed.")]
-              ["e" "every" false (_ "Short for -b -a, scan everything")]
-              ["w" "workspace" false (_ "Scan the workspace") ["s"]]
-              ["s" "staging" false (_ "Scan the staging area (pre-commit).") []]
-              ["g" "changes" false (_ "Report lint failures only for diff'd sections") ["l"]]
-              ["m" "complete" false (_ "Report lint failures for all files") []]
+              ["e" "every" false (_ "Short for -b -a: scan everything")]
+              ["w" "workspace" false (_ "Scan the workspace") ["staging"]]
+              ["s" "staging" false (_ "Scan the staging area (useful for pre-commit).") []]
+              ["g" "changes" false (_ "Report lint failures only for diff'd sections") ["complete"]]
+              ["p" "complete" false (_ "Report lint failures for all files") []]
               ["c" "config" true (_ "Path to config file") []]
               ["h" "help" false (_ "This help message") []]
               ["v" "version" false (_"Version information") []]])
 
-; Given a set of command-line arguments, compare that to a mapped
-; version of the optlist and return a canonicalized dictionary of all
-; the arguments that have been set.  For example "-c" and "--config"
-; will both be mapped to "config".
-
-; Given a prefix of one or two dashes and a position in the above
-; array, creates a function to map either the short or long option
-; to the option name.
-
-(defn make-opt-assoc [prefix pos]
-  (fn [acc it] (assoc acc (+ prefix (get it pos)) (get it 1)) acc)) 
-
-; Using the above, create a full map of all arguments, then return a
-; function ready to look up any argument and return the option name.  
-
-(defn make-options-rationalizer [optlist]
-  (let [
-        [short-opt-assoc (make-opt-assoc "-" 0)]
-        [long-opt-assoc (make-opt-assoc "--" 1)]
-        [fullset 
-         (reduce (fn [acc i] (-> (short-opt-assoc acc i)
-                                 (long-opt-assoc i))) optlist {})]]
-    (fn [acc it] (do (assoc acc (get fullset (get it 0)) (get it 1)) acc))))
-
-(defn print-version []
-  (print (.format "git-lint (hy version {})" *version*))
-  (print "Copyright (c) 2008, 2016 Kenneth M. \"Elf\" Sternberg <elf.sternberg@gmail.com>")
-  (sys.exit))
-
-(defn print-help []
-  (print "Usage: git lint [options] [filename]")
-  (for [item optlist] (print (.format " -{:<1}  --{:<12}  {}" (get item 0) (get item 1) (get item 3))))
-  (sys.exit))
-
-(defn get-git-response [cmd]
+(defn get-git-response-raw [cmd]
   (let [[fullcmd (+ ["git"] cmd)]
         [process (subprocess.Popen fullcmd
                                    :stdout subprocess.PIPE
                                    :stderr subprocess.PIPE)]
         [(, out err) (.communicate process)]]
     (, out err process.returncode)))
+
+(defn get-git-response [cmd]
+  (let [[(, out error returncode) (get-git-response-raw cmd)]] out))
+
+(defn split-git-response [cmd]
+  (let [[(, out error returncode) (get-git-response-raw cmd)]] (.splitlines out)))
+
+(defn split-git-response [cmd]
+  (let [[(, out error returncode) (get-git-response-raw cmd)]] (.splitlines out)))
+
 
 (defn run-git-command [cmd]
   (let [[fullcmd (+ ["git"] cmd)]]
@@ -76,35 +57,59 @@
     (, out err process.returncode)))
 
 (def git-base (let [[(, out error returncode)
-                     (get-git-response ["rev-parse" "--show-toplevel"])]]
+                     (get-git-response-raw ["rev-parse" "--show-toplevel"])]]
                 (if (not (= returncode 0)) None (.rstrip out))))
 
-(defn find-config-file [options]
-  (if (.has_key options "config")
-    (let [[config (get options "config")]
-          [configpath (os.path.abspath config)]]
-      (if (os.path.isfile configpath)
-        configpath
-        (sys.exit (.format (_ "Configuration file not found: {}\n") config))))
-    (let [[home (os.path.join (.get os.environ "HOME"))]
-          [possibles (, (os.path.join git-base ".git-lint")
-                        (os.path.join git-base ".git-lint/config")
-                        (os.path.join home ".git-lint")
-                        (os.path.join home ".git-lint/config"))]
-          [matches (list (filter os.path.isfile possibles))]]
-      (if (len matches) (get matches 0) (sys.exit (_ "No configuration file found"))))))
+(defn get-all-from-cwd []
+  (split-git-response ["ls-tree" "--name-only" "-r" "HEAD"]))
 
-(defn load-config-file [path]
-  (let [[configloader (.SafeConfigParser ConfigParser)]
-        [config {}]]
-    (.read configloader path)
-    (.set configloader "DEFAULT" "repdir" git-base)
-    (for [section (.sections configloader)]
-      (let [[pairs {}]]
-        (for [(, k v) (.items configloader section)]
-          (assoc pairs k v))
-        (assoc config section pairs)))
-    config))
+(defn get-all-from-base []
+  (split-git-response ["ls-tree" "--name-only" "-r" "--full-tree" "HEAD"]))
+
+                                        ; Any of these indicate the tree is in a merge
+                                        ; conflict state and the user has bigger problems.
+(def *merge-conflict-pairs* (set ["DD" "DU" "AU" "AA" "UD" "UA" "UU"]))
+(defn get-changed-from-source [trackings]
+  (let [[conflicts (filter (fn [t] (t[0:2] in *merge-conflict-pairs*)) trackings)]]
+    (if (len conflicts)
+      (sys.exit (_ "Current repository contains merge conflicts. Linters will not be run."))
+      trackings)))
+
+(defn get-porcelain-status [cmd]
+  (let [[stream (.split (get-git-response cmd) "\0")]
+        [parse-stream (fn [acc stream]
+                        (if (= 0 (len stream))
+                          acc
+                          (let [[temp (.pop stream 0)]
+                                [index (.pop temp 0)]
+                                [workspace (.pop temp 0)]
+                                [filename (slice temp 1)]]
+                            (if (= index "R")
+                              (.pop stream 0))
+                            (parse-stream (.append acc (, index workspace filename)) stream))))]]
+    (parse-stream [] stream)))
+
+(defn modified-in-workspace [s] (s[0] in ["M" "A" "?"]))
+(defn modified-in-staging   [s] (s[1] in ["M" "A" "?"]))
+(defn get-name              [s] (s[2]))
+
+                                        ;(defn get-changed-from-cwd []
+                                        ;  (->>  (get-changed-from_source (split-git-response ["status" "--porcelain" "--untracked-files=all"]))
+                                        ;        (filter (fn [s] (s[0] in 
+                                        ;  
+                                        ;  (map (fn [s] 
+                                        ;  (filter (fn [s] (
+                                        ;
+
+(defn get-changed-from-base []
+  (get-changed-from_source (split-git-response ["status" "--porcelain" "--untracked-files=all" git-base])))
+
+(defn get-staged-from-cwd []
+  ())
+
+(defn gen-staged-from-base []
+  ())
+
 
 (defn make-match-filter-matcher [extensions]
   (->> (map (fn [s] (.split s ",")) extensions)
@@ -119,39 +124,52 @@
 
 (defn make-match-filter [config]
   (let [[matcher (make-match-filter-matcher (map (fn [v] (.get v "match" "" ))
-                                                    (.itervalues config)))]]
-    (print matcher)
+                                                 (.itervalues config)))]]
     (fn [path] (.search matcher path))))
+
+(defn executable-exists [script label]
+  (if (not (len script))
+    (sys.exit (.format (_ "Syntax error in command configuration for {} ") label))
+    (let [[scriptname (get (.split script " ") 0)]
+          [paths (.split (.get os.environ "PATH") ":")]
+          [isexecutable (fn [p] (and (os.path.exists p) (os.access p os.X_OK)))]]
+      (if (not (len scriptname))
+        (sys.exit (.format (_ "Syntax error in command configuration for {} ") label))
+        (if (= (get scriptname 0) "/")
+          (if (isexecutable scriptname)
+            scriptname None)
+          (let [[possibles (list (filter (fn [path] (isexecutable (os.path.join path scriptname))) paths))]]
+            (if (len possibles)
+              (get possibles 0)  None)))))))
 
 (defn print-linters [config]
   (print (_ "Currently supported linters:"))
   (for [(, linter items) (.iteritems config)]
-    (print (.format "{:<14} {}" linter (.get items "comment" "")))))
+    (if (not (executable-exists (.get items "command" "") linter))
+      (print (.format "{:<14} {}" linter (_ "(WARNING: executable not found)")))
+      (print (.format "{:<14} {}" linter (.get items "comment" ""))))))
 
 (defn git-lint-main [options]
   (print git-base)
   (print (os.path.abspath __file__))
-  (let [[config (load-config-file (find-config-file))]]
+  (let [[config (get-config-file options git-base)]]
     (print options)
     (print config)
     (print (make-match-filter config))))
 
 (defmain [&rest args]
-  (try
-   (let [[optstringsshort 
-          (.join "" (map (fn [i] (+ (. i [0]) (cond [(. i [2]) ":"] [true ""]))) optlist))]
-         [optstringslong 
-          (list (map (fn [i] (+ (. i [1]) (cond [(. i [2]) "="] [true ""]))) optlist))]
-         [(, opt arg) 
-          (getopt.getopt (slice args 1) optstringsshort optstringslong)]
-         [rationalize-options 
-          (make-options-rationalizer optlist)]
-         [options (reduce (fn [acc i] (rationalize-options acc i)) opt {})]
-         [config (load-config-file (find-config-file options))]]
-     (cond [(.has_key options "help") (print-help)]
-           [(.has_key options "version") (print-version)]
-           [(.has_key options "linters") (print-linters config)]
-           [true (git-lint-main options)]))
-   (catch [err getopt.GetoptError]
-       (print (str err))
-     (print-help))))
+  (if (= git-base None)
+    (sys.exit (_ "Not currently in a git repository."))
+    (try
+      (let [[opts (hyopt optlist args "git lint"
+                          "Copyright (c) 2008, 2016 Kenneth M. \"Elf\" Sternberg <elf.sternberg@gmail.com>"
+                          "0.0.4")]
+            [options opts.options]
+            [config (get-config options git-base)]]
+        (cond [(.has_key options "help") (opts.print-help)]
+              [(.has_key options "version") (opts.print-version)]
+              [(.has_key options "linters") (print-linters config)]
+              [true (git-lint-main options)]))
+      (catch [err getopt.GetoptError]
+          (print (str err))
+        (print-help)))))
