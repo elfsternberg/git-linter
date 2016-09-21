@@ -52,6 +52,7 @@
                      [rationalize-options (make-options-rationalizer optlist)]
                      [(, newoptions excluded) (remove-conflicted-options
                                                optlist (reduce (fn [acc i] (rationalize-options acc i)) opt {}))]]
+                 (setv self.optlist optlist)
                  (setv self.options newoptions)
                  (setv self.excluded excluded)
                  (setv self.filesames arg)
@@ -59,15 +60,15 @@
                  (setv self.version version)
                  (setv self.copyright copyright))
                None)]
-
+   
    [print-help (fn [self]
                  (print (.format (_ "Usage: {} [options] [filenames]") self.name))
-                 (for [item optlist] (print (.format " -{:<1}  --{:<12}  {}" (get item 0) (get item 1) (get item 3))))
+                 (for [item self.optlist] (print (.format " -{:<1}  --{:<12}  {}" (get item 0) (get item 1) (get item 3))))
                  (sys.exit))]
-
+   
    [print-version (fn [self]
                     (print (.format "{}" self.name self.version))
-                    (if (self.copyright)
+                    (if self.copyright
                       (print self.copyright))
                     (sys.exit))]])
   

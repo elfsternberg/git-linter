@@ -17,7 +17,7 @@
               ["a" "all" false (_ "Scan all files in the repository, not just those that have changed.")]
               ["e" "every" false (_ "Short for -b -a: scan everything")]
               ["w" "workspace" false (_ "Scan the workspace") ["staging"]]
-              ["s" "staging" false (_ "Scan the staging area (useful for pre-commit).") []]
+              ["s" "staging" false (_ "Scan the staging area (useful for pre-commit).") ["base" "all" "every"]]
               ["g" "changes" false (_ "Report lint failures only for diff'd sections") ["complete"]]
               ["p" "complete" false (_ "Report lint failures for all files") []]
               ["c" "config" true (_ "Path to config file") []]
@@ -27,6 +27,7 @@
 (defn get-git-response-raw [cmd]
   (let [[fullcmd (+ ["git"] cmd)]
         [process (subprocess.Popen fullcmd
+                                   :universal-newlines True
                                    :stdout subprocess.PIPE
                                    :stderr subprocess.PIPE)]
         [(, out err) (.communicate process)]]
@@ -52,6 +53,7 @@
   (let [[process (subprocess.Popen fullcmd
                                    :stdout subprocess.PIPE
                                    :stderr subprocess.PIPE
+                                   :universal-newlines True
                                    :shell True)]
         [(, out err) (.communicate process)]]
     (, out err process.returncode)))
@@ -75,22 +77,24 @@
       (sys.exit (_ "Current repository contains merge conflicts. Linters will not be run."))
       trackings)))
 
-(defn get-porcelain-status [cmd]
-  (let [[stream (.split (get-git-response cmd) "\0")]
+(defn get-porcelain-status []
+  (let [[cmd ["status" "-z" "--porcelain" "--untracked-files=all" "--ignore-submodules=all"]]
+        [nonnull (fn [s] (> (len s) 0))]
+        [stream (tap (list (filter nonnull (.split (get-git-response cmd) "\0"))))]
         [parse-stream (fn [acc stream]
                         (if (= 0 (len stream))
                           acc
                           (let [[temp (.pop stream 0)]
-                                [index (.pop temp 0)]
-                                [workspace (.pop temp 0)]
-                                [filename (slice temp 1)]]
+                                [index (get temp 0)]
+                                [workspace (get temp 1)]
+                                [filename (tap (slice temp 3))]]
                             (if (= index "R")
                               (.pop stream 0))
-                            (parse-stream (.append acc (, index workspace filename)) stream))))]]
+                            (parse-stream (+ acc [(, index workspace filename)]) stream))))]]
     (parse-stream [] stream)))
 
-(defn modified-in-workspace [s] (s[0] in ["M" "A" "?"]))
-(defn modified-in-staging   [s] (s[1] in ["M" "A" "?"]))
+(defn modified-in-workspace [s] (in s[0] ["M" "A" "?"]))
+(defn modified-in-staging   [s] (in s[1] ["M" "A"]))
 (defn get-name              [s] (s[2]))
 
                                         ;(defn get-changed-from-cwd []
@@ -152,10 +156,11 @@
 (defn git-lint-main [options]
   (print git-base)
   (print (os.path.abspath __file__))
-  (let [[config (get-config-file options git-base)]]
+  (let [[config (get-config options git-base)]]
     (print options)
     (print config)
-    (print (make-match-filter config))))
+    (print (make-match-filter config))
+    (print (get-porcelain-status))))
 
 (defmain [&rest args]
   (if (= git-base None)
