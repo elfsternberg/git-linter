@@ -38,7 +38,7 @@
         [exclude (reduce (fn [memo opt] (+ memo (if (> (len opt) 4) (get opt 4) []))) marked [])]
         [excluded (filter (fn [key] (in key exclude)) keys)]
         [cleaned (reduce (fn [memo key]
-                           (if (not (in key exclude)) (assoc memo key (get config key))) memo) keys {})]]
+                           (if (not (in key excluded)) (assoc memo key (get config key))) memo) keys {})]]
     (, cleaned excluded)))
 
 (defclass hyopt []
