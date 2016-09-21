@@ -1,4 +1,6 @@
-(import sys os.path ConfigParser)
+; -*- mode: clojure -*-
+(import sys os.path gettext ConfigParser)
+(def _ gettext.gettext)
         
 (defn -find-config-file [options base]
   (if (.has_key options "config")
