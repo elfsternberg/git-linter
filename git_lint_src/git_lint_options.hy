@@ -55,12 +55,14 @@
                  (setv self.optlist optlist)
                  (setv self.options newoptions)
                  (setv self.excluded excluded)
-                 (setv self.filesames arg)
+                 (setv self.filenames arg)
                  (setv self.name (if name name (get-script-name)))
                  (setv self.version version)
                  (setv self.copyright copyright))
                None)]
-   
+
+   [get-options (fn [self] self.options)]
+   [get-keys (fn [self] (set (.keys self.options)))]
    [print-help (fn [self]
                  (print (.format (_ "Usage: {} [options] [filenames]") self.name))
                  (for [item self.optlist] (print (.format " -{:<1}  --{:<12}  {}" (get item 0) (get item 1) (get item 3))))

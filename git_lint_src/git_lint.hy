@@ -8,7 +8,6 @@
 (def *version* "0.0.2")
 
 (defn tap [a] (print "TAP:" a) a)
-
                                         ; short-name long-name takes-args description precludes
 (def optlist [["o" "only" true (_ "A comma-separated list of only those linters to run") ["exclude"]]
               ["x" "exclude" true (_ "A comma-separated list of linters to skip") []]
@@ -60,56 +59,13 @@
                      (get-git-response-raw ["rev-parse" "--show-toplevel"])]]
                 (if (not (= returncode 0)) None (.rstrip out))))
 
-(defn get-all-from-cwd []
-  (split-git-response ["ls-tree" "--name-only" "-r" "HEAD"]))
-
-(defn get-all-from-base []
-  (split-git-response ["ls-tree" "--name-only" "-r" "--full-tree" "HEAD"]))
-
-                                        ; Any of these indicate the tree is in a merge
-                                        ; conflict state and the user has bigger problems.
-(def *merge-conflict-pairs* (set ["DD" "DU" "AU" "AA" "UD" "UA" "UU"]))
-(defn get-changed-from-source [trackings]
-  (let [[conflicts (filter (fn [t] (t[0:2] in *merge-conflict-pairs*)) trackings)]]
-    (if (len conflicts)
-      (sys.exit (_ "Current repository contains merge conflicts. Linters will not be run."))
-      trackings)))
-
-(defn get-porcelain-status [cmd]
-  (let [[stream (.split (get-git-response cmd) "\0")]
-        [parse-stream (fn [acc stream]
-                        (if (= 0 (len stream))
-                          acc
-                          (let [[temp (.pop stream 0)]
-                                [index (.pop temp 0)]
-                                [workspace (.pop temp 0)]
-                                [filename (slice temp 1)]]
-                            (if (= index "R")
-                              (.pop stream 0))
-                            (parse-stream (.append acc (, index workspace filename)) stream))))]]
-    (parse-stream [] stream)))
-
-(defn modified-in-workspace [s] (s[0] in ["M" "A" "?"]))
-(defn modified-in-staging   [s] (s[1] in ["M" "A" "?"]))
-(defn get-name              [s] (s[2]))
-
-                                        ;(defn get-changed-from-cwd []
-                                        ;  (->>  (get-changed-from_source (split-git-response ["status" "--porcelain" "--untracked-files=all"]))
-                                        ;        (filter (fn [s] (s[0] in 
-                                        ;  
-                                        ;  (map (fn [s] 
-                                        ;  (filter (fn [s] (
-                                        ;
-
-(defn get-changed-from-base []
-  (get-changed-from_source (split-git-response ["status" "--porcelain" "--untracked-files=all" git-base])))
-
-(defn get-staged-from-cwd []
-  ())
-
-(defn gen-staged-from-base []
-  ())
-
+; That mystery number is the precise hash code for a repository for has been initialized,
+; but for which nothing has ever been added or committed.  An empty repository has no refs
+; at all so you can't use HEAD in this one very rare case.
+(def git-head
+  (let [[empty-repository-hash "4b825dc642cb6eb9a060e54bf8d69288fbee4904"]
+        [(, out err returncode) (get-git-response-raw ["rev-parse" "--verify HEAD"])]]
+    (if (not err) "HEAD" empty-repository-hash)))
 
 (defn make-match-filter-matcher [extensions]
   (->> (map (fn [s] (.split s ",")) extensions)
@@ -125,7 +81,13 @@
 (defn make-match-filter [config]
   (let [[matcher (make-match-filter-matcher (map (fn [v] (.get v "match" "" ))
                                                  (.itervalues config)))]]
-    (fn [path] (.search matcher path))))
+    (fn [path] (print matcher.pattern) (.search matcher path))))
+
+; _    _     _                                 _        _    _          _        _           
+;| |  (_)_ _| |_ ___ _ _   _____ _____ __ _  _| |_ __ _| |__| |___   __| |_ __ _| |_ _  _ ___
+;| |__| | ' \  _/ -_) '_| / -_) \ / -_) _| || |  _/ _` | '_ \ / -_) (_-<  _/ _` |  _| || (_-<
+;|____|_|_||_\__\___|_|   \___/_\_\___\__|\_,_|\__\__,_|_.__/_\___| /__/\__\__,_|\__|\_,_/__/
+;                                                                                            
 
 (defn executable-exists [script label]
   (if (not (len script))
@@ -149,27 +111,141 @@
       (print (.format "{:<14} {}" linter (_ "(WARNING: executable not found)")))
       (print (.format "{:<14} {}" linter (.get items "comment" ""))))))
 
-(defn git-lint-main [options]
-  (print git-base)
-  (print (os.path.abspath __file__))
-  (let [[config (get-config-file options git-base)]]
-    (print options)
-    (print config)
-    (print (make-match-filter config))))
+; ___ _ _                  _   _       __ _ _ _              
+;| __(_) |___   _ __  __ _| |_| |_    / _(_) | |_ ___ _ _ ___
+;| _|| | / -_) | '_ \/ _` |  _| ' \  |  _| | |  _/ -_) '_(_-<
+;|_| |_|_\___| | .__/\__,_|\__|_||_| |_| |_|_|\__\___|_| /__/
+;              |_|                                           
+
+(defn remove-submodules [files]
+  (let [[split-out-paths (fn [s] (get (.split s " ") 2))]
+        [fixer-re (re.compile "^(\.\.\/)+")]
+        [fixer-to-base (fn [s] (.sub fixer-re "" s))]
+        [submodule-entries (split-git-response ["submodule" "status"])]
+        [submodule-names (map (fn [s] (fixer-to-base (split-out-paths s))) submodule-entries)]]
+    (filter (fn [s] (not (in s submodule-names))) files)))
+
+(defn base-file-filter [files]
+  (map (fn [f] (os.path.join git-base f)) files))
+
+(defn cwd-file-filter [files]
+  (let [[gitcwd (os.path.join (os.path.relpath (os.getcwd) git-base) "")]]
+    (base-file-filter (filter (fn [f] (.startswith f gitcwd)) files))))
+
+(defn base-file-cleaner [files]
+  (map (fn [f] (.replace f git-base 1)) files))
+
+; ___                __ _ _       _ _    _                                _              
+;| _ \__ ___ __ __  / _(_) |___  | (_)__| |_   __ _ ___ _ _  ___ _ _ __ _| |_ ___ _ _ ___
+;|   / _` \ V  V / |  _| | / -_) | | (_-<  _| / _` / -_) ' \/ -_) '_/ _` |  _/ _ \ '_(_-<
+;|_|_\__,_|\_/\_/  |_| |_|_\___| |_|_/__/\__| \__, \___|_||_\___|_| \__,_|\__\___/_| /__/
+;                                             |___/                                      
+
+(def *merge-conflict-pairs* (set ["DD" "DU" "AU" "AA" "UD" "UA" "UU"]))
+(defn check-for-conflicts [files]
+  (let [[status-pairs (map (fn [(, index workspace filename)] (+ "" index workspace)) files)]
+        [conflicts (& (set *merge-conflict-pairs*) (set status-pairs))]]
+    (if (len conflicts)
+      (sys.exit (_ "Current repository contains merge conflicts. Linters will not be run."))
+      files)))
+
+(defn get-porcelain-status []
+  (let [[cmd ["status" "-z" "--porcelain" "--untracked-files=all" "--ignore-submodules=all"]]
+        [nonnull (fn [s] (> (len s) 0))]
+        [stream (list (filter nonnull (.split (get-git-response cmd) "\0")))]
+        [parse-stream (fn [acc stream]
+                        (if (= 0 (len stream))
+                          acc
+                          (let [[temp (.pop stream 0)]
+                                [index (get temp 0)]
+                                [workspace (get temp 1)]
+                                [filename (slice temp 3)]]
+                            (if (= index "R")
+                              (.pop stream 0))
+                            (parse-stream (+ acc [(, index workspace filename)]) stream))))]]
+    (check-for-conflicts (parse-stream [] stream))))
+
+(defn staging-list []
+  (map (fn [(, index workspace filename)] filename)
+       (filter (fn [(, index workspace filename)] (in index ["A" "M"])) (get-porcelain-status))))
+
+(defn working-list []
+  (map (fn [(, index workspace filename)] filename)
+       (filter (fn [(, index workspace filename)] (in workspace ["A" "M" "?"])) (get-porcelain-status))))
+
+(defn all-list []
+  (let [[cmd ["ls-tree" "--name-only" "--full-tree" "-r" "-z" git-head]]]
+    (filter (fn [s] (> (len s) 0)) (.split (get-git-response cmd) "\0"))))
+
+;   _                     _    _        __ _ _       _ _    _                                _           
+;  /_\   ______ ___ _ __ | |__| |___   / _(_) |___  | (_)__| |_   __ _ ___ _ _  ___ _ _ __ _| |_ ___ _ _ 
+; / _ \ (_-<_-</ -_) '  \| '_ \ / -_) |  _| | / -_) | | (_-<  _| / _` / -_) ' \/ -_) '_/ _` |  _/ _ \ '_|
+;/_/ \_\/__/__/\___|_|_|_|_.__/_\___| |_| |_|_\___| |_|_/__/\__| \__, \___|_||_\___|_| \__,_|\__\___/_|  
+;                                                                |___/                                   
+
+(defn pick-filelist-strategy [options]
+  (let [[keys (.keys options)]
+        [working-directory-trans (if (len (& (set keys) (set ["base" "every"]))) base-file-filter cwd-file-filter)]
+        [file-list-generator (cond [(in "staging" keys) staging-list]
+                                   [(in "all" keys) all-list]
+                                   [true working-list])]]
+    (fn [] (working-directory-trans (remove-submodules (file-list-generator))))))
+
+;  ___ _                                                         
+; / __| |_  ___  ___ ___ ___   __ _   _ _ _  _ _ _  _ _  ___ _ _ 
+;| (__| ' \/ _ \/ _ (_-</ -_) / _` | | '_| || | ' \| ' \/ -_) '_|
+; \___|_||_\___/\___/__/\___| \__,_| |_|  \_,_|_||_|_||_\___|_|  
+;                                                                
+
+(defn staging-wrapper [run-linters]
+  (let [[time-gather (fn [f] (let [[stats (os.stat f)]]
+                               (, f (, stats.atime stats.mtime))))]
+        [times (list (map time-gather files))]]
+    (run-git-command ["stash" "--keep-index"])
+    (let [[results (run-linters)]]
+      (run-git-command ["reset" "--hard"])
+      (run-git-command ["stash" "pop" "--quiet" "--index"])
+      (for [(, filename timepair) times]
+        (os.utime filename timepair))
+      results)))
+
+(defn workspace-wrapper [run-linters]
+  (run-linters files))
+
+(defn pick-runner [options]
+  (let [[keys (.keys options)]]
+    (if (in "s" keys) staging-wrapper workspace-wrapper)))
+
+; __  __      _      
+;|  \/  |__ _(_)_ _  
+;| |\/| / _` | | ' \ 
+;|_|  |_\__,_|_|_||_|
+;                    
+
+(defn run-gitlint [options config extras]
+  (let [[file-lister (pick-filelist-strategy options)]
+        [runner (pick-runner options)]
+        [match-filter (make-match-filter config)]
+        [lintables (set (filter match-filter (file-lister)))]
+        
+;        [report-maker (pick-report-maker options)]
+;        [linters (pick-linters options config)]]
+        ]
+    (print (list lintables))))
 
 (defmain [&rest args]
-  (if (= git-base None)
-    (sys<.exit (_ "Not currently in a git repository."))
-    (try
-          (let [[opts (hyopt optlist args "git lint"
-                              "Copyright (c) 2008, 2016 Kenneth M. \"Elf\" Sternberg <elf.sternberg@gmail.com>"
-                          "0.0.4")]
-            [options opts.options]
-            [config (get-config options git-base)]]
-        (cond [(.has_key options "help") (opts.print-help)]
-              [(.has_key options "version") (opts.print-version)]
-              [(.has_key options "linters") (print-linters config)]
-              [true (git-lint-main options)]))
-      (catch [err getopt.GetoptError]
-          (print (str err))
-        (print-help)))))
+  (let [[opts (hyopt optlist args "git lint"
+                     "Copyright (c) 2008, 2016 Kenneth M. \"Elf\" Sternberg <elf.sternberg@gmail.com>"
+                     "0.0.4")]]
+    (if (= git-base None)
+      (sys.exit (_ "Not currently in a git repository."))
+      (try
+        (let [[options (.get_options opts)]
+              [config (get-config options git-base)]]
+          (cond [(.has_key options "help") (opts.print-help)]
+                [(.has_key options "version") (opts.print-version)]
+                [(.has_key options "linters") (print-linters config)]
+                [true (run-gitlint options config opts.filenames)]))
+        (catch [err getopt.GetoptError]
+            (do
+              (opts.print-help)))))))

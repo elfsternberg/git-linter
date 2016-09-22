@@ -284,3 +284,4 @@
   (let [[empty-repository-hash "4b825dc642cb6eb9a060e54bf8d69288fbee4904"]
         [(, out err returncode) (get-git-response ["rev-parse" "--verify HEAD"])]]
     (if err empty-repository-hash "HEAD")))
+

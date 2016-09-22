@@ -13,14 +13,16 @@
 (def optlist [["o" "only" true (_ "A comma-separated list of only those linters to run") ["exclude"]]
               ["x" "exclude" true (_ "A comma-separated list of linters to skip") []]
               ["l" "linters" false (_ "Show the list of configured linters")]
-              ["b" "base" false (_ "Check all changed files in the repository, not just those in the current directory.") []]
-              ["a" "all" false (_ "Scan all files in the repository, not just those that have changed.")]
+              ["b" "base" false (_ "Scan from the base directory rather than the current working") []]
+              ["a" "all" false (_ "Scan all files in the repository, not just those that have changed")]
               ["e" "every" false (_ "Short for -b -a: scan everything")]
               ["w" "workspace" false (_ "Scan the workspace") ["staging"]]
-              ["s" "staging" false (_ "Scan the staging area (useful for pre-commit).") ["base" "all" "every"]]
+              ["s" "staging" false (_ "Scan the staging area (useful for pre-commit).") ["base" "all" "every" "workspace"]]
               ["g" "changes" false (_ "Report lint failures only for diff'd sections") ["complete"]]
-              ["p" "complete" false (_ "Report lint failures for all files") []]
+              ["p" "complete" false (_ "Report lint failures over whole files") []]
               ["c" "config" true (_ "Path to config file") []]
+              ["d" "dryrun" false (_ "Report what git-lint would do, but don't actually do anything.") []]
+              ["q" "quiet" false (_ "Produce a short report of files that failed to pass.") []]
               ["h" "help" false (_ "This help message") []]
               ["v" "version" false (_"Version information") []]])
 
@@ -162,19 +164,26 @@
     (print (make-match-filter config))
     (print (get-porcelain-status))))
 
+
 (defmain [&rest args]
-  (if (= git-base None)
-    (sys.exit (_ "Not currently in a git repository."))
-    (try
-      (let [[opts (hyopt optlist args "git lint"
-                          "Copyright (c) 2008, 2016 Kenneth M. \"Elf\" Sternberg <elf.sternberg@gmail.com>"
-                          "0.0.4")]
-            [options opts.options]
-            [config (get-config options git-base)]]
-        (cond [(.has_key options "help") (opts.print-help)]
-              [(.has_key options "version") (opts.print-version)]
-              [(.has_key options "linters") (print-linters config)]
-              [true (git-lint-main options)]))
-      (catch [err getopt.GetoptError]
-          (print (str err))
-        (print-help)))))
+  (for [option optlist]
+    (print (.format "``-{}`` ``--{}``\n    {}" (get option 0) (get option 1) (get option 3)))))
+                    
+
+;(defmain [&rest args]
+;  (if (= git-base None)
+;    (sys.exit (_ "Not currently in a git repository."))
+;    (try
+;      (let [[opts (hyopt optlist args "git lint"
+;                          "Copyright (c) 2008, 2016 Kenneth M. \"Elf\" Sternberg <elf.sternberg@gmail.com>"
+;                          "0.0.4")]
+;            [options opts.options]
+;            [config (get-config options git-base)]]
+;        (cond [(.has_key options "help") (opts.print-help)]
+;              [(.has_key options "version") (opts.print-version)]
+;              [(.has_key options "linters") (print-linters config)]
+;              [true (git-lint-main options)]))
+;      (catch [err getopt.GetoptError]
+;          (print (str err))
+;        (print-help)))))
+;
