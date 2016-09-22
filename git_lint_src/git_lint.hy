@@ -37,10 +37,6 @@
 (defn split-git-response [cmd]
   (let [[(, out error returncode) (get-git-response-raw cmd)]] (.splitlines out)))
 
-(defn split-git-response [cmd]
-  (let [[(, out error returncode) (get-git-response-raw cmd)]] (.splitlines out)))
-
-
 (defn run-git-command [cmd]
   (let [[fullcmd (+ ["git"] cmd)]]
     (subprocess.call fullcmd
@@ -66,6 +62,30 @@
   (let [[empty-repository-hash "4b825dc642cb6eb9a060e54bf8d69288fbee4904"]
         [(, out err returncode) (get-git-response-raw ["rev-parse" "--verify HEAD"])]]
     (if (not err) "HEAD" empty-repository-hash)))
+
+
+(defn run-external-checker [filename check]
+  (let [[cmd (-> (get check "command")
+                 (.format
+                  :filename filename
+                  :config_path *config-path*))]
+        [(, out err returncode) (get-shell-response cmd)]]
+    (if (or (and out (= (.get check "error_condition" "error") "output"))
+            err
+            (not (= returncode 0)))
+      (let [[prefix (if (get check "print_filename")
+                      (.format "\t{}:" filename)
+                      "\t")]
+            [output (+ (encode-shell-messages prefix out)
+                       (if err (encode-shell-messages prefix err) []))]]
+        [(or returncode 1) output])
+      [0 []])))
+
+; ___ _ _                           ___     _               _             ___ _           _   
+;| __(_) |___ _ _  __ _ _ __  ___  | __|_ _| |_ ___ _ _  __(_)___ _ _    / __| |_  ___ __| |__
+;| _|| | / -_) ' \/ _` | '  \/ -_) | _|\ \ /  _/ -_) ' \(_-< / _ \ ' \  | (__| ' \/ -_) _| / /
+;|_| |_|_\___|_||_\__,_|_|_|_\___| |___/_\_\\__\___|_||_/__/_\___/_||_|  \___|_||_\___\__|_\_\
+;                                                                                             
 
 (defn make-match-filter-matcher [extensions]
   (->> (map (fn [s] (.split s ",")) extensions)

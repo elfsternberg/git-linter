@@ -11,41 +11,41 @@ git lint [options] [filenames]
 
 Options
 -------
-
-``-h`` ``--help``
-    Help
-
-``-v`` ``--version``
-    Version info
-
-``-c`` ``--config``
-    Specify config file (default: ``$GIT_DIR/.git-lint``)
-
-``-w`` ``--workspace``
-    Check workspace [default]
-    
-``-s`` ``--staging``
-    Check files in the staging area (useful as a pre-commit hook)
-    
-``-b`` ``--base``
-    Run checks from your repository's root directory. By default,
-    ``git-lint`` only runs from the current working directory.
-
-``-a`` ``--all``
-    Check all files in repository from the current directory, not
-    just changed files
-
-``-e`` ``--everything``
-   An alias for ``-b -a``, checks every file in the repository
-    
 ``-o`` ``--only``
-    Run only specific linters, skipping all others
-    
-``-e`` ``--exclude``
-    Exclude specific linters, running all others    
+    A comma-separated list of only those linters to run
+``-x`` ``--exclude``
+    A comma-separated list of linters to skip
+``-l`` ``--linters``
+    Show the list of configured linters
+``-b`` ``--base``
+    Check all changed files in the repository, not just those in the current directory.
+``-a`` ``--all``
+    Scan all files in the repository, not just those that have changed.
+``-e`` ``--every``
+    Short for -b -a: scan everything
+``-w`` ``--workspace``
+    Scan the workspace
+``-s`` ``--staging``
+    Scan the staging area (useful for pre-commit).
+``-g`` ``--changes``
+    Report lint failures only for diff'd sections
+``-p`` ``--complete``
+    Report lint failures for all files
+``-c`` ``--config``
+    Path to config file
+``-d`` ``--dryrun``
+    Report what git-lint would do, but don't actually do anything.
+``-q`` ``--quiet``
+    Produce a short report of files that failed to pass.
+``-h`` ``--help``
+    This help message
+``-v`` ``--version``
+    Version information
 
 As a pre-commit hook:
 ---------------------
+
+.. code-block:: python
 
     #!/usr/bin/env python
     import git_lint
@@ -53,6 +53,8 @@ As a pre-commit hook:
 
 Install this file in your project's ``.git/hooks/pre-commit``, and set
 the file's executable flag to ``true``:
+
+.. code-block:: shell
 
     chmod +x pre-commit
 
