@@ -64,11 +64,9 @@
     (if (not err) "HEAD" empty-repository-hash)))
 
 
-(defn run-external-checker [filename check]
-  (let [[cmd (-> (get check "command")
-                 (.format
-                  :filename filename
-                  :config_path *config-path*))]
+(defn run-external-checker [path config]
+  (let [[cmd (-> (get config "command")
+                 (.format (+ command " \"{}\"") path))]
         [(, out err returncode) (get-shell-response cmd)]]
     (if (or (and out (= (.get check "error_condition" "error") "output"))
             err
@@ -99,9 +97,8 @@
        ((fn [s] (re.compile s re.I)))))
 
 (defn make-match-filter [config]
-  (let [[matcher (make-match-filter-matcher (map (fn [v] (.get v "match" "" ))
-                                                 (.itervalues config)))]]
-    (fn [path] (print matcher.pattern) (.search matcher path))))
+  (let [[matcher (make-match-filter-matcher (map (fn [v] (.get v "match" "" )) (.itervalues config)))]]
+    (fn [path] (.search matcher path))))
 
 ; _    _     _                                 _        _    _          _        _           
 ;| |  (_)_ _| |_ ___ _ _   _____ _____ __ _  _| |_ __ _| |__| |___   __| |_ __ _| |_ _  _ ___
@@ -112,8 +109,7 @@
 (defn executable-exists [script label]
   (if (not (len script))
     (sys.exit (.format (_ "Syntax error in command configuration for {} ") label))
-    (let [[scriptname (get (.split script " ") 0)]
-          [paths (.split (.get os.environ "PATH") ":")]
+    (let [[scriptname (get (.split script " ") 0)]          [paths (.split (.get os.environ "PATH") ":")]
           [isexecutable (fn [p] (and (os.path.exists p) (os.access p os.X_OK)))]]
       (if (not (len scriptname))
         (sys.exit (.format (_ "Syntax error in command configuration for {} ") label))
@@ -124,26 +120,24 @@
             (if (len possibles)
               (get possibles 0)  None)))))))
 
+(defn get-working-linters [config]
+  (let [[found (fn [key] (executable-exists (.get (.get config key) "command") key))]]
+    (set (filter found (.keys config)))))
+
 (defn print-linters [config]
   (print (_ "Currently supported linters:"))
-  (for [(, linter items) (.iteritems config)]
-    (if (not (executable-exists (.get items "command" "") linter))
-      (print (.format "{:<14} {}" linter (_ "(WARNING: executable not found)")))
-      (print (.format "{:<14} {}" linter (.get items "comment" ""))))))
+  (let [[working (get-working-linters config)]
+        [broken (- (set (.keys config)) working)]]
+    (for [key (sorted working)]
+      (print (.format "{:<14} {}" key (.get (.get config key) "comment" ""))))
+    (for [key (sorted broken)]
+      (print (.format "{:<14} {}" key (_ "(WARNING: executable not found)"))))))
 
 ; ___ _ _                  _   _       __ _ _ _              
 ;| __(_) |___   _ __  __ _| |_| |_    / _(_) | |_ ___ _ _ ___
 ;| _|| | / -_) | '_ \/ _` |  _| ' \  |  _| | |  _/ -_) '_(_-<
 ;|_| |_|_\___| | .__/\__,_|\__|_||_| |_| |_|_|\__\___|_| /__/
 ;              |_|                                           
-
-(defn remove-submodules [files]
-  (let [[split-out-paths (fn [s] (get (.split s " ") 2))]
-        [fixer-re (re.compile "^(\.\.\/)+")]
-        [fixer-to-base (fn [s] (.sub fixer-re "" s))]
-        [submodule-entries (split-git-response ["submodule" "status"])]
-        [submodule-names (map (fn [s] (fixer-to-base (split-out-paths s))) submodule-entries)]]
-    (filter (fn [s] (not (in s submodule-names))) files)))
 
 (defn base-file-filter [files]
   (map (fn [f] (os.path.join git-base f)) files))
@@ -168,6 +162,14 @@
     (if (len conflicts)
       (sys.exit (_ "Current repository contains merge conflicts. Linters will not be run."))
       files)))
+
+(defn remove-submodules [files]
+  (let [[split-out-paths (fn [s] (get (.split s " ") 2))]
+        [fixer-re (re.compile "^(\.\.\/)+")]
+        [fixer-to-base (fn [s] (.sub fixer-re "" s))]
+        [submodule-entries (split-git-response ["submodule" "status"])]
+        [submodule-names (map (fn [s] (fixer-to-base (split-out-paths s))) submodule-entries)]]
+    (filter (fn [s] (not (in s submodule-names))) files)))
 
 (defn get-porcelain-status []
   (let [[cmd ["status" "-z" "--porcelain" "--untracked-files=all" "--ignore-submodules=all"]]
@@ -197,19 +199,23 @@
   (let [[cmd ["ls-tree" "--name-only" "--full-tree" "-r" "-z" git-head]]]
     (filter (fn [s] (> (len s) 0)) (.split (get-git-response cmd) "\0"))))
 
-;   _                     _    _        __ _ _       _ _    _                                _           
-;  /_\   ______ ___ _ __ | |__| |___   / _(_) |___  | (_)__| |_   __ _ ___ _ _  ___ _ _ __ _| |_ ___ _ _ 
-; / _ \ (_-<_-</ -_) '  \| '_ \ / -_) |  _| | / -_) | | (_-<  _| / _` / -_) ' \/ -_) '_/ _` |  _/ _ \ '_|
-;/_/ \_\/__/__/\___|_|_|_|_.__/_\___| |_| |_|_\___| |_|_/__/\__| \__, \___|_||_\___|_| \__,_|\__\___/_|  
+;    _                     _    _        __ _ _       _ _    _                                _           
+;   /_\   ______ ___ _ __ | |__| |___   / _(_) |___  | (_)__| |_   __ _ ___ _ _  ___ _ _ __ _| |_ ___ _ _ 
+;  / _ \ (_-<_-</ -_) '  \| '_ \ / -_) |  _| | / -_) | | (_-<  _| / _` / -_) ' \/ -_) '_/ _` |  _/ _ \ '_|
+; /_/ \_\/__/__/\___|_|_|_|_.__/_\___| |_| |_|_\___| |_|_/__/\__| \__, \___|_||_\___|_| \__,_|\__\___/_|  
 ;                                                                |___/                                   
-
-(defn pick-filelist-strategy [options]
+;
+; Returns a list of all the files in the repository for a given strategy: staging or
+; workspace, base, all, base + all.  Halts if the repository is in an unstable (merging)
+; state.
+;
+(defn get-filelist [options]
   (let [[keys (.keys options)]
         [working-directory-trans (if (len (& (set keys) (set ["base" "every"]))) base-file-filter cwd-file-filter)]
         [file-list-generator (cond [(in "staging" keys) staging-list]
                                    [(in "all" keys) all-list]
                                    [true working-list])]]
-    (fn [] (working-directory-trans (remove-submodules (file-list-generator))))))
+    (set ((fn [] (working-directory-trans (remove-submodules (file-list-generator))))))))
 
 ;  ___ _                                                         
 ; / __| |_  ___  ___ ___ ___   __ _   _ _ _  _ _ _  _ _  ___ _ _ 
@@ -230,11 +236,53 @@
       results)))
 
 (defn workspace-wrapper [run-linters]
-  (run-linters files))
+  (run-linters))
+
+
+; Returns a function that takes the "main" program function as its argument, and runs
+; "main" in either the stage or workspace.  If it runs it in the stage, it gathers all the
+; file utimes, and attempts to restore them after restaging.
 
 (defn pick-runner [options]
   (let [[keys (.keys options)]]
-    (if (in "s" keys) staging-wrapper workspace-wrapper)))
+    (if (in "staging" keys) staging-wrapper workspace-wrapper)))
+
+
+;  ___                 _                        _ _     _   
+; | __|_ _____ __ _  _| |_ ___   ___ _ _  ___  | (_)_ _| |_ 
+; | _|\ \ / -_) _| || |  _/ -_) / _ \ ' \/ -_) | | | ' \  _|
+; |___/_\_\___\__|\_,_|\__\___| \___/_||_\___| |_|_|_||_\__|
+;                                                           
+
+(defn lmap (pred iter) (list (map pred iter)))
+(defn encode-shell-messages [prefix messages]
+  (lmap (fn [line] (.format "{}{}" prefix (.decode line "utf-8")))
+        (.splitlines messages)))
+
+(defn run-external-linter [filename linter]
+  (let [[cmd (+ (get linter "command") "\"" filename "\"")]
+        [(, out err returncode) (get-shell-response cmd)]]
+    (if (or (and out (= (.get linter "condition" "error") "output"))
+            err
+            (not (= returncode 0)))
+      (let [[prefix (if (get linter "print")
+                      (.format "\t{}:" filename)
+                      "\t")]
+            [output (+ (encode-shell-messages prefix out)
+                       (if err (encode-shell-messages prefix err) []))]]
+        [(or returncode 1) output])
+      [0 []])))
+
+(defn run-one-linter [linter filenames]
+  (let [[match-filter (make-match-filter linter)]
+        [config (get (.values linter) 0)]
+        [files (set (filter match-filter filenames))]]
+    (list (map (fn [f] (run-external-linter f config)) files))))
+
+(defn build-lint-runner [linters filenames]
+  (fn []
+    (let [[keys (sorted (.keys linters))]]
+      (map (fn [key] (run-one-linter {key (get linters key)} filenames)) keys))))
 
 ; __  __      _      
 ;|  \/  |__ _(_)_ _  
@@ -242,16 +290,27 @@
 ;|_|  |_\__,_|_|_||_|
 ;                    
 
+(defn subset-config [config keys]
+  (let [[ret {}]]
+    (for [item (.items config)]
+      (if (in (get item 0) keys) (assoc ret (get item 0) (get item 1))))
+    ret))
+
 (defn run-gitlint [options config extras]
-  (let [[file-lister (pick-filelist-strategy options)]
+  (let [[all-files (get-filelist options)]
         [runner (pick-runner options)]
         [match-filter (make-match-filter config)]
-        [lintables (set (filter match-filter (file-lister)))]
-        
-;        [report-maker (pick-report-maker options)]
-;        [linters (pick-linters options config)]]
-        ]
-    (print (list lintables))))
+        [lintable-files (set (filter match-filter all-files))] ; Files for which a linter is defined.
+        [unlintables (- (set all-files) lintable-files)] ; Files for which no linter is defined
+        [working-linters (get-working-linters config)]
+        [broken-linters (- (set config) (set working-linters))]
+        [cant-lint-filter (make-match-filter (subset-config config broken-linters))]
+        [cant-lintable (set (filter cant-lint-filter lintable-files))]
+        [lint-runner (build-lint-runner (subset-config config working-linters) lintable-files)]
+        [results (runner lint-runner)]]
+    (print "No Linter Available:" (list unlintables))
+    (print "Linter Executable Not Found for:" (list cant-lintable))
+    (print (list results))))
 
 (defmain [&rest args]
   (let [[opts (hyopt optlist args "git lint"
