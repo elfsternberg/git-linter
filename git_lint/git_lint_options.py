@@ -4,39 +4,25 @@ import sys
 import inspect
 import getopt
 import gettext
+
 _ = gettext.gettext
 
+
 def get_script_name():
-    if getattr(sys, u'frozen', False):
+    if getattr(sys, 'frozen', False):
+        (path, name) = os.path.split(sys.executable)
+        return name
 
-        def _hy_anon_fn_1():
-            (path, name) = os.path.split(sys.executable)
-            (path, name)
-            return name()
-        _hy_anon_var_1 = _hy_anon_fn_1()
-    else:
-
-        def _hy_anon_fn_4():
-            prefix = sys.exec_prefix.upper()
-
-            def _hy_anon_fn_3(a):
-
-                def _hy_anon_fn_2():
-                    fname = a[1L]
-                    return (not (fname.startswith(u'<') or fname.upper().startswith(prefx)))
-                _hy_anon_fn_2()
-                return inspect.stack()
-            names = filter(_hy_anon_fn_3)
-            name = names.pop()
-            return name()
-        _hy_anon_var_1 = _hy_anon_fn_4()
-    return _hy_anon_var_1
-
+    prefix = sys.exec_prefix.upper()
+    names = [name for name in [frame[1] for frame in inspect.stack()]
+             if name.startswith('<') or names.upper().startswith(prefix)]
+    return names.pop()
 
 
 def make_options_rationalizer(optlist):
-    """ Takes a list of option tuples, and returns a function that takes the output of getopt
-        and reduces it to the longopt key and associated values.
+    """Takes a list of option tuples, and returns a function that takes
+        the output of getopt and reduces it to the longopt key and
+        associated values as a dictionary.
     """
 
     def make_opt_assoc(prefix, pos):
@@ -45,14 +31,14 @@ def make_options_rationalizer(optlist):
             return acc
         return associater
 
-    short_opt_assoc = make_opt_assoc(u'-', 0)
-    long_opt_assoc = make_opt_assoc(u'--', 1)
-    
+    short_opt_assoc = make_opt_assoc('-', 0)
+    long_opt_assoc = make_opt_assoc('--', 1)
+
     def make_full_set(acc, i):
         return long_opt_assoc(short_opt_assoc(acc, i), i)
-    
+
     fullset = reduce(make_full_set, optlist, {})
-    
+
     def rationalizer(acc, it):
         acc[fullset[it[0]]] = it[1]
         return acc
@@ -60,46 +46,42 @@ def make_options_rationalizer(optlist):
     return rationalizer
 
 
-def remove_conflicted_options(optlist, config):
-    keys = config.keys()
-    marked = filter(lambda o: o[1] in keys, optlist)
-    
+def remove_conflicted_options(optlist, request):
+    """Takes our list of option tuples, and a cleaned copy of what was
+        requested from getopt, and returns a copy of the request
+        without any options that are marked as superseded, along with
+        the list of superseded options
+    """
+    def get_excluded_keys(memo, opt):
+        return memo + (len(opt) > 4 and opt[4] or [])
 
-    exclude = reduce
-    def _hy_anon_fn_13(memo, opt):
-            return (memo + (opt[4L] if (len(opt) > 4L) else []))
-        exclude = reduce(_hy_anon_fn_13, marked, [])
-
-        def _hy_anon_fn_14(key):
-            return (key in exclude)
-        excluded = filter(_hy_anon_fn_14, keys)
-
-        def _hy_anon_fn_15(memo, key):
-            if (not (key in excluded)):
-                memo[key] = config[key]
-                _hy_anon_var_2 = None
-            else:
-                _hy_anon_var_2 = None
-            return memo
-        cleaned = reduce(_hy_anon_fn_15, keys, {})
-        return (cleaned, excluded)
-    return _hy_anon_fn_16()
+    keys = request.keys()
+    marked = [option for option in optlist if option[1] in keys]
+    exclude = reduce(get_excluded_keys, marked, [])
+    excluded = [key for key in keys if key in exclude]
+    cleaned = {key: request[key] for key in keys
+               if key not in excluded}
+    return (cleaned, excluded)
 
 
 class RationalOptions:
 
-    def __init__(self, optlist, args, name=u'', copyright=u'', version=u'0.0.1'):
+    def __init__(self, optlist, args, name='', copyright='', version='0.0.1'):
         def shortoptstogo(i):
             return i[0] + (i[2] and ':' or '')
 
         def longoptstogo(i):
             return i[1] + (i[2] and '=' or '')
-        
-        optstringsshort = ''.join(map(shortoptstogo, optlist))
-        optstringslong = map(longoptstogo, optlist))
-        (options, arg) = getopt.getopt(args[1:], optstringsshort, optstringslong)
+
+        optstringsshort = ''.join([shortoptstogo(opt) for opt in optlist])
+        optstringslong = [longoptstogo(opt) for opt in optlist]
+        (options, arg) = getopt.getopt(args[1:], optstringsshort,
+                                       optstringslong)
+
+        # Turns what getopt returns into something more human-readable
         rationalize_options = make_options_rationalizer(optlist)
 
+        # Remove any options that
         (newoptions, excluded) = remove_conflicted_options(
             optlist, reduce(rationalize_options, options, {}))
 

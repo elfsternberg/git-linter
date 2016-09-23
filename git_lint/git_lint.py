@@ -1,353 +1,237 @@
-from hy.core.language import filter, is_integer, map, reduce
 import ConfigParser
-import os
-import subprocess
-import operator
-import re
-import gettext
-import sys
 import getopt
-sys.path.append(u'Users/ksternberg/build/git-lint/git_lint_src')
+import gettext
+import operator
+import os
+import re
+import subprocess
+import sys
 from git_lint_options import hyopt
 from git_lint_config import get_config
-_ = gettext.gettext
-VERSION = u'0.0.2'
 
-def tap(a):
-    print(u'TAP:', a)
-    return a
-optlist = [[u'o', u'only', True, _(u'A comma-separated list of only those linters to run'), [u'exclude']], [u'x', u'exclude', True, _(u'A comma-separated list of linters to skip'), []], [u'l', u'linters', False, _(u'Show the list of configured linters')], [u'b', u'base', False, _(u'Check all changed files in the repository, not just those in the current directory.'), []], [u'a', u'all', False, _(u'Scan all files in the repository, not just those that have changed.')], [u'e', u'every', False, _(u'Short for -b -a: scan everything')], [u'w', u'workspace', False, _(u'Scan the workspace'), [u'staging']], [u's', u'staging', False, _(u'Scan the staging area (useful for pre-commit).'), []], [u'g', u'changes', False, _(u"Report lint failures only for diff'd sections"), [u'complete']], [u'p', u'complete', False, _(u'Report lint failures for all files'), []], [u'c', u'config', True, _(u'Path to config file'), []], [u'h', u'help', False, _(u'This help message'), []], [u'v', u'version', False, _(u'Version information'), []]]
+_ = gettext.gettext
+
+VERSION = '0.0.2'
+
+
+optlist = [
+    ('o', 'only', True, _('A comma-separated list of only those linters to run'), ['exclude']),
+    ('x', 'exclude', True, _('A comma-separated list of linters to skip'), []),
+    ('l', 'linters', False, _('Show the list of configured linters')),
+    ('b', 'base', False, _('Check all changed files in the repository, not just those in the current directory.'), []),
+    ('a', 'all', False, _('Scan all files in the repository, not just those that have changed.')),
+    ('e', 'every', False, _('Short for -b -a: scan everything')], ['w', 'workspace', False, _('Scan the workspace'), ['staging']),
+    ('s', 'staging', False, _('Scan the staging area (useful for pre-commit).'), []),
+    ('g', 'changes', False, _(u"Report lint failures only for diff'd sections"), ['complete']),
+    ('p', 'complete', False, _('Report lint failures for all files'), []], ['c', 'config', True, _('Path to config file'), []),
+    ('h', 'help', False, _('This help message'), []], ['v', 'version', False, _('Version information'), [])]
+
 
 def get_git_response_raw(cmd):
+    fullcmd = ([u'git'] + cmd)
+    process = subprocess.Popen(fullcmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (out, err) = process.communicate()
+    return (out, err, process.returncode)
 
-    def _hy_anon_fn_2():
-        fullcmd = ([u'git'] + cmd)
-        process = subprocess.Popen(fullcmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (out, err) = process.communicate()
-        (out, err)
-        return (out, err, process.returncode)
-    return _hy_anon_fn_2()
 
 def get_git_response(cmd):
+    (out, error, returncode) = get_git_response_raw(cmd)
+    return out
 
-    def _hy_anon_fn_4():
-        (out, error, returncode) = get_git_response_raw(cmd)
-        (out, error, returncode)
-        return out
-    return _hy_anon_fn_4()
 
 def split_git_response(cmd):
+    (out, error, returncode) = get_git_response_raw(cmd)
+    return out.splitlines()
 
-    def _hy_anon_fn_6():
-        (out, error, returncode) = get_git_response_raw(cmd)
-        (out, error, returncode)
-        return out.splitlines()
-    return _hy_anon_fn_6()
 
 def run_git_command(cmd):
+    fullcmd = (['git'] + cmd)
+    return subprocess.call(fullcmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    def _hy_anon_fn_8():
-        fullcmd = ([u'git'] + cmd)
-        return subprocess.call(fullcmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return _hy_anon_fn_8()
 
 def get_shell_response(fullcmd):
+    process = subprocess.Popen(fullcmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    (out, err) = process.communicate()
+    return (out, err, process.returncode)
 
-    def _hy_anon_fn_10():
-        process = subprocess.Popen(fullcmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        (out, err) = process.communicate()
-        (out, err)
-        return (out, err, process.returncode)
-    return _hy_anon_fn_10()
 
-def _hy_anon_fn_12():
-    (out, error, returncode) = get_git_response_raw([u'rev-parse', u'--show-toplevel'])
-    (out, error, returncode)
-    return (None if (not (returncode == 0L)) else out.rstrip())
-git_base = _hy_anon_fn_12()
+def get_git_base():
+    (out, error, returncode) = get_git_response_raw(['rev-parse', '--show-toplevel'])
+    return returncode == 0 and out.rstrip() or None
 
-def _hy_anon_fn_13():
-    empty_repository_hash = u'4b825dc642cb6eb9a060e54bf8d69288fbee4904'
-    (out, err, returncode) = get_git_response_raw([u'rev-parse', u'--verify HEAD'])
-    (out, err, returncode)
-    return (u'HEAD' if (not err) else empty_repository_hash)
-git_head = _hy_anon_fn_13()
+
+def get_git_head():
+    empty_repository_hash = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
+    (out, err, returncode) = get_git_response_raw(['rev-parse', '--verify HEAD'])
+    return (err and empty_repository_hash or 'HEAD')
+
+
+git_base = get_git_base()
+git_head = get_git_head()
+
+
+def encode_shell_messages(prefix, messages):
+    return ['{}{}'.format(prefix, line.decode('utf-8')) for line in messages.splitlines()]
+
 
 def run_external_checker(path, config):
+    cmd = config[u'command'].format((command + ' "{}"'), path)
+    (out, err, returncode) = get_shell_response(cmd)
+    if ((out and (check.get('error_condition', 'error') == 'output')) or err or (not (returncode == 0))):
+        prefix = check['print_filename'] and '\t{}:'.format(filename) or '\t'
+        output = encode_shell_messages(prefix, out) + (err and encode_shell_messages(prefix, err) or [])
+        return [(returncode or 1), output]
+    return [0, []]
 
-    def _hy_anon_fn_15():
-        cmd = config[u'command'].format((command + u' "{}"'), path)
-        (out, err, returncode) = get_shell_response(cmd)
-        (out, err, returncode)
-        if ((out and (check.get(u'error_condition', u'error') == u'output')) or err or (not (returncode == 0L))):
-
-            def _hy_anon_fn_14():
-                prefix = (u'\t{}:'.format(filename) if check[u'print_filename'] else u'\t')
-                output = (encode_shell_messages(prefix, out) + (encode_shell_messages(prefix, err) if err else []))
-                return [(returncode or 1L), output]
-            _hy_anon_var_1 = _hy_anon_fn_14()
-        else:
-            _hy_anon_var_1 = [0L, []]
-        return _hy_anon_var_1
-    return _hy_anon_fn_15()
 
 def make_match_filter_matcher(extensions):
+    trimmed = reduce(operator.add, [s.strip for s in [ex.split(',') for ex in extension-s]])
+    cleaned = [re.sub(r'^\.', s.strip(), '') for s in trimmed]
+    return re.compile(r'\.' + '|'.join(cleaned) + r'$')
 
-    def _hy_anon_fn_17(s):
-        return re.compile(s, re.I)
-
-    def _hy_anon_fn_18(s):
-        return ((u'\\.(' + s) + u')$')
-
-    def _hy_anon_fn_19(s):
-        return re.sub(u'^\\.', u'', s)
-
-    def _hy_anon_fn_20(s):
-        return (not (0L == len(s)))
-
-    def _hy_anon_fn_21(s):
-        return s.strip()
-
-    def _hy_anon_fn_22(s):
-        return s.split(u',')
-    return _hy_anon_fn_17(_hy_anon_fn_18(u'|'.join(map(_hy_anon_fn_19, filter(_hy_anon_fn_20, set(map(_hy_anon_fn_21, reduce(operator.add, map(_hy_anon_fn_22, extensions)))))))))
 
 def make_match_filter(config):
+    matcher = make_match_filter_matcher([v.get('match', '') for v in config.itervalues()])
+    def match_filter(path):
+        return matcher.search(path)
+    return match_filter
 
-    def _hy_anon_fn_26():
-
-        def _hy_anon_fn_24(v):
-            return v.get(u'match', u'')
-        matcher = make_match_filter_matcher(map(_hy_anon_fn_24, config.itervalues()))
-
-        def _hy_anon_fn_25(path):
-            return matcher.search(path)
-        return _hy_anon_fn_25
-    return _hy_anon_fn_26()
 
 def executable_exists(script, label):
-    if (not len(script)):
-        _hy_anon_var_4 = sys.exit(_(u'Syntax error in command configuration for {} ').format(label))
-    else:
+    if not len(script):
+        sys.exit(_('Syntax error in command configuration for {} ').format(label))
 
-        def _hy_anon_fn_31():
-            scriptname = script.split(u' ')[0L]
-            paths = os.environ.get(u'PATH').split(u':')
+    scriptname = script.split(' ').pop(0)
+    if not len(scriptname):
+        sys.exit(_('Syntax error in command configuration for {} ').format(label))
 
-            def isexecutable(p):
-                return (os.path.exists(p) and os.access(p, os.X_OK))
-            if (not len(scriptname)):
-                _hy_anon_var_3 = sys.exit(_(u'Syntax error in command configuration for {} ').format(label))
-            else:
-                if (scriptname[0L] == u'/'):
-                    _hy_anon_var_2 = (scriptname if isexecutable(scriptname) else None)
-                else:
+    def isexecutable(path):
+        return os.path.exists(path) and os.access(path, os.X_OK)
 
-                    def _hy_anon_fn_30():
+    if scriptname.startswith('/'):
+        return isexecutable(scriptname) and scriptname or None
 
-                        def _hy_anon_fn_29(path):
-                            return isexecutable(os.path.join(path, scriptname))
-                        possibles = list(filter(_hy_anon_fn_29, paths))
-                        return (possibles[0L] if len(possibles) else None)
-                    _hy_anon_var_2 = _hy_anon_fn_30()
-                _hy_anon_var_3 = _hy_anon_var_2
-            return _hy_anon_var_3
-        _hy_anon_var_4 = _hy_anon_fn_31()
-    return _hy_anon_var_4
+    possibles = [path for path in
+                 [os.path.join(path, scriptname) for path in os.environ.get('PATH').split(':')]
+                 if is_executable(path)]
+    return len(possibles) and possibles.pop(0) or None
+
 
 def get_working_linters(config):
+    return set([key for key in config.keys()
+                if executable_exists(config[key]['command'], key)])
 
-    def _hy_anon_fn_34():
-
-        def found(key):
-            return executable_exists(config.get(key).get(u'command'), key)
-        return set(filter(found, config.keys()))
-    return _hy_anon_fn_34()
 
 def print_linters(config):
-    print(_(u'Currently supported linters:'))
+    print(_('Currently supported linters:'))
+    working = get_working_linters(config)
+    broken = (set(config.keys()) - working)
+    for key in sorted(working):
+        print('{:<14} {}'.format(key, config[key].get('comment', '')))
+    for key in sorted(broken):
+        print('{:<14} {}'.format(key, _('(WARNING: executable not found)')))
 
-    def _hy_anon_fn_36():
-        working = get_working_linters(config)
-        broken = (set(config.keys()) - working)
-        for key in sorted(working):
-            print(u'{:<14} {}'.format(key, config.get(key).get(u'comment', u'')))
-        for key in sorted(broken):
-            print(u'{:<14} {}'.format(key, _(u'(WARNING: executable not found)')))
-    return _hy_anon_fn_36()
 
 def base_file_filter(files):
+    return [os.path.join(git_base, file) for file in files]
 
-    def _hy_anon_fn_38(f):
-        return os.path.join(git_base, f)
-    return map(_hy_anon_fn_38, files)
 
 def cwd_file_filter(files):
+    gitcwd = os.path.join(os.path.relpath(os.getcwd(), git_base), '')
+    return base_file_filter([file for file in files 
+                             if file.startswith(gitcwd)])
 
-    def _hy_anon_fn_41():
-        gitcwd = os.path.join(os.path.relpath(os.getcwd(), git_base), u'')
-
-        def _hy_anon_fn_40(f):
-            return f.startswith(gitcwd)
-        return base_file_filter(filter(_hy_anon_fn_40, files))
-    return _hy_anon_fn_41()
 
 def base_file_cleaner(files):
+    return [file.replace(git_base, '', 1) for file in files]
 
-    def _hy_anon_fn_43(f):
-        return f.replace(git_base, 1L)
-    return map(_hy_anon_fn_43, files)
-MERGE_CONFLICT_PAIRS = set([u'DD', u'DU', u'AU', u'AA', u'UD', u'UA', u'UU'])
 
-def check_for_conflicts(files):
+MERGE_CONFLICT_PAIRS = set(['DD', 'DU', 'AU', 'AA', 'UD', 'UA', 'UU'])
+def check_for_conflicts(filesets):
+    status_pairs = set(['' + f[0] + f[1] for f in files])
+    if len(status_pairs & MERGE_CONFLICT_PAIRS):
+        sys.exit(_('Current repository contains merge conflicts. Linters will not be run.'))
+    return filesets
 
-    def _hy_anon_fn_46():
-
-        def _hy_anon_fn_45(_hy_anon_var_5):
-            (index, workspace, filename) = _hy_anon_var_5
-            (index, workspace, filename)
-            return ((u'' + index) + workspace)
-        status_pairs = map(_hy_anon_fn_45, files)
-        conflicts = (set(MERGE_CONFLICT_PAIRS) & set(status_pairs))
-        return (sys.exit(_(u'Current repository contains merge conflicts. Linters will not be run.')) if len(conflicts) else files)
-    return _hy_anon_fn_46()
-
+    
 def remove_submodules(files):
+    fixer_re = re.compile('^(\\.\\.\\/)+')
+    submodules = split_git_response(['submodule', 'status'])
+    submodule_names = [fixer_re.sub('', submodule.split(' ')[2]) for submodule in submodules]
+    return [file for file in files if (file not in submodule_names)]
 
-    def _hy_anon_fn_52():
-
-        def split_out_paths(s):
-            return s.split(u' ')[2L]
-        fixer_re = re.compile(u'^(\\.\\.\\/)+')
-
-        def fixer_to_base(s):
-            return fixer_re.sub(u'', s)
-        submodule_entries = split_git_response([u'submodule', u'status'])
-
-        def _hy_anon_fn_50(s):
-            return fixer_to_base(split_out_paths(s))
-        submodule_names = map(_hy_anon_fn_50, submodule_entries)
-
-        def _hy_anon_fn_51(s):
-            return (not (s in submodule_names))
-        return filter(_hy_anon_fn_51, files)
-    return _hy_anon_fn_52()
 
 def get_porcelain_status():
+    cmd = [u'status', u'-z', u'--porcelain', u'--untracked-files=all', u'--ignore-submodules=all']
+    stream = [entry for entry in get_git_response(cmd).split(u'\x00')
+              if len(entry) > 0]
+    acc = []
 
-    def _hy_anon_fn_57():
-        cmd = [u'status', u'-z', u'--porcelain', u'--untracked-files=all', u'--ignore-submodules=all']
+    while len(stream) > 0:
+        entry = stream.pop(0)
+        (index, workspace, filename) = (entry[0], entry[1], entry[3:])
+        if index == 'R':
+            stream.pop(0)
+        acc = acc + [(index, workspace, filename)]
+    return acc
 
-        def nonnull(s):
-            return (len(s) > 0L)
-        stream = list(filter(nonnull, get_git_response(cmd).split(u'\x00')))
-
-        def parse_stream(acc, stream):
-            if (0L == len(stream)):
-                _hy_anon_var_6 = acc
-            else:
-
-                def _hy_anon_fn_55():
-                    temp = stream.pop(0L)
-                    index = temp[0L]
-                    workspace = temp[1L]
-                    filename = temp[3L:]
-                    (stream.pop(0L) if (index == u'R') else None)
-                    return parse_stream((acc + [(index, workspace, filename)]), stream)
-                _hy_anon_var_6 = _hy_anon_fn_55()
-            return _hy_anon_var_6
-        return check_for_conflicts(parse_stream([], stream))
-    return _hy_anon_fn_57()
 
 def staging_list():
+    return [filename for (index, workspace, filename) in get_porcelain_status()
+            if index in ['A', 'M']]
 
-    def _hy_anon_fn_59(_hy_anon_var_7):
-        (index, workspace, filename) = _hy_anon_var_7
-        (index, workspace, filename)
-        return filename
-
-    def _hy_anon_fn_60(_hy_anon_var_8):
-        (index, workspace, filename) = _hy_anon_var_8
-        (index, workspace, filename)
-        return (index in [u'A', u'M'])
-    return map(_hy_anon_fn_59, filter(_hy_anon_fn_60, get_porcelain_status()))
 
 def working_list():
+    return [filename for (index, workspace, filename) in get_porcelain_status()
+            if workspace in ['A', 'M', '?']]
 
-    def _hy_anon_fn_62(_hy_anon_var_9):
-        (index, workspace, filename) = _hy_anon_var_9
-        (index, workspace, filename)
-        return filename
-
-    def _hy_anon_fn_63(_hy_anon_var_10):
-        (index, workspace, filename) = _hy_anon_var_10
-        (index, workspace, filename)
-        return (workspace in [u'A', u'M', u'?'])
-    return map(_hy_anon_fn_62, filter(_hy_anon_fn_63, get_porcelain_status()))
 
 def all_list():
+    cmd = ['ls-tree', '--name-only', '--full-tree', '-r', '-z', git_head]
+    return [file for file in get_git_response(cmd).split(u'\x00')
+            if len(file) > 0]
 
-    def _hy_anon_fn_66():
-        cmd = [u'ls-tree', u'--name-only', u'--full-tree', u'-r', u'-z', git_head]
-
-        def _hy_anon_fn_65(s):
-            return (len(s) > 0L)
-        return filter(_hy_anon_fn_65, get_git_response(cmd).split(u'\x00'))
-    return _hy_anon_fn_66()
 
 def get_filelist(options):
+    keys = options.keys()
 
-    def _hy_anon_fn_69():
-        keys = options.keys()
-        working_directory_trans = (base_file_filter if len((set(keys) & set([u'base', u'every']))) else cwd_file_filter)
-        file_list_generator = (staging_list if (u'staging' in keys) else (all_list if (u'all' in keys) else (working_list if True else None)))
+    working_directory_trans = cwd_file_filter
+    if len(set(keys) & set([u'base', u'every'])):
+        working_directory_trans = base_file_filter
 
-        def _hy_anon_fn_68():
-            return working_directory_trans(remove_submodules(file_list_generator()))
-        return set(_hy_anon_fn_68())
-    return _hy_anon_fn_69()
+    file_list_generator = working_list
+    if 'staging' in keys:
+        file_list_generator = staging_list
+
+    return working_directory_trans(remove_submodules(file_list_generator))
+
 
 def staging_wrapper(run_linters):
-
-    def _hy_anon_fn_74():
-
         def time_gather(f):
+            stats = os.stat(f)
+            return (f, (stats.atime, stats.mtime))
 
-            def _hy_anon_fn_71():
-                stats = os.stat(f)
-                return (f, (stats.atime, stats.mtime))
-            return _hy_anon_fn_71()
-        times = list(map(time_gather, files))
+        times = [time_gather(file) for file in files]
         run_git_command([u'stash', u'--keep-index'])
 
-        def _hy_anon_fn_73():
-            results = run_linters()
-            run_git_command([u'reset', u'--hard'])
-            run_git_command([u'stash', u'pop', u'--quiet', u'--index'])
-            for (filename, timepair) in times:
-                os.utime(filename, timepair)
-            return results
-        return _hy_anon_fn_73()
-    return _hy_anon_fn_74()
+        results = run_linters()
+        run_git_command([u'reset', u'--hard'])
+        run_git_command([u'stash', u'pop', u'--quiet', u'--index'])
+
+        for (filename, timepair) in times:
+            os.utime(filename, timepair)
+        return results
+
 
 def workspace_wrapper(run_linters):
     return run_linters()
 
 def pick_runner(options):
+    if 'staging' in options.keys():
+        return staging_wrapper
+    return workspace_wrapper
 
-    def _hy_anon_fn_77():
-        keys = options.keys()
-        return (staging_wrapper if (u'staging' in keys) else workspace_wrapper)
-    return _hy_anon_fn_77()
 
-def lmap(pred, iter):
-    return list(map(pred, iter))
-
-def encode_shell_messages(prefix, messages):
-
-    def _hy_anon_fn_80(line):
-        return u'{}{}'.format(prefix, line.decode(u'utf-8'))
-    return lmap(_hy_anon_fn_80, messages.splitlines())
 
 def run_external_linter(filename, linter):
 

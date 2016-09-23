@@ -2,10 +2,12 @@ import sys
 import os.path
 import gettext
 import ConfigParser
+
 _ = gettext.gettext
 
+
 def _find_config_file(options, base):
-    if options.has_key('config'):
+    if 'config' in options:
         config = options['config']
         configpath = os.path.abspath(config)
         if not os.path.isfile(configpath):
@@ -18,11 +20,12 @@ def _find_config_file(options, base):
                  os.path.join(home, '.git-lint'),
                  os.path.join(home, '.git-lint/config'))
 
-    matches = filter(os.path.isfile, possibles)
+    matches = [p for p in possibles if os.path.isfile(p)]
     if len(matches) == 0:
-        sys.exit(_('No configuration file found')))
+        sys.exit(_('No configuration file found'))
 
     return matches[0]
+
 
 def get_config(options, base):
     path = find_config_file(options, base)
