@@ -2,7 +2,7 @@
 comment = Check to Ensure no debugger commands get checked in
 output = Checking for debugger commands in Javascript...
 command = grep -n debugger
-files = .js
+match = .js
 print =  True
 condition = output
 

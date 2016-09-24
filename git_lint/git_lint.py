@@ -1,4 +1,5 @@
-import ConfigParser
+from __future__ import print_function
+from functools import reduce
 import getopt
 import gettext
 import operator
@@ -13,6 +14,9 @@ _ = gettext.gettext
 
 VERSION = '0.0.2'
 
+def tap(a):
+    print("TAP:", a)
+    return a
 
 optlist = [
     ('o', 'only', True,
@@ -53,7 +57,8 @@ def get_git_response_raw(cmd):
     fullcmd = (['git'] + cmd)
     process = subprocess.Popen(fullcmd,
                                stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                               stderr=subprocess.PIPE,
+                               universal_newlines=True)
     (out, err) = process.communicate()
     return (out, err, process.returncode)
 
@@ -72,14 +77,16 @@ def run_git_command(cmd):
     fullcmd = (['git'] + cmd)
     return subprocess.call(fullcmd,
                            stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE)
+                           stderr=subprocess.PIPE,
+                               universal_newlines=True)
 
 
 def get_shell_response(fullcmd):
     process = subprocess.Popen(fullcmd,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
-                               shell=True)
+                               shell=True,
+                               universal_newlines=True)
     (out, err) = process.communicate()
     return (out, err, process.returncode)
 
@@ -112,15 +119,15 @@ def base_file_cleaner(files):
 
 
 def make_match_filter_matcher(extensions):
-    trimmed = reduce(operator.add, [s.strip for s in
-                                    [ex.split(',') for ex in extension-s]])
-    cleaned = [re.sub(r'^\.', s.strip(), '') for s in trimmed]
+    trimmed = [s.strip() for s in reduce(operator.add, 
+                                         [ex.split(',') for ex in extensions], [])]
+    cleaned = [re.sub(r'^\.', '', s) for s in trimmed]
     return re.compile(r'\.' + '|'.join(cleaned) + r'$')
 
 
 def make_match_filter(config):
     matcher = make_match_filter_matcher([v.get('match', '')
-                                         for v in config.itervalues()])
+                                         for v in config.values()])
 
     def match_filter(path):
         return matcher.search(path)
@@ -181,7 +188,7 @@ def print_linters(config):
 #  \___\___|\__| |_|_/__/\__| \___/_|   |_| |_|_\___/__/
 #                                                       
 
-def get_filelist(options):
+def get_filelist(options, extras):
     """ Returns the list of files against which we'll run the linters. """
 
     def base_file_filter(files):
@@ -199,7 +206,7 @@ def get_filelist(options):
     def check_for_conflicts(filesets):
         """ Scan list of porcelain files for merge conflic state. """
         MERGE_CONFLICT_PAIRS = set(['DD', 'DU', 'AU', 'AA', 'UD', 'UA', 'UU'])
-        status_pairs = set(['' + f[0] + f[1] for f in files])
+        status_pairs = set(['' + f[0] + f[1] for f in filesets])
         if len(status_pairs & MERGE_CONFLICT_PAIRS):
             sys.exit(
                 _('Current repository contains merge conflicts. Linters will not be run.'))
@@ -277,7 +284,7 @@ def get_filelist(options):
     if 'staging' in keys:
         file_list_generator = staging_list
 
-    return working_directory_trans(remove_submodules(file_list_generator))
+    return working_directory_trans(remove_submodules(file_list_generator()))
 
 
 #  ___ _             _                                                
@@ -286,7 +293,7 @@ def get_filelist(options):
 # |___/\__\__,_\__, |_|_||_\__, |  \_/\_/|_| \__,_| .__/ .__/\___|_|  
 #              |___/       |___/                  |_|  |_|            
 
-def pick_runner(options):
+def pick_stash_runner(options):
     """Choose a runner.
 
     This is the operation that will run the linters.  It exists to
@@ -316,7 +323,7 @@ def pick_runner(options):
     def workspace_wrapper(run_linters):
         return run_linters()
 
-    return staging in options.keys() and staging_wrapper or workspace_wrapper
+    return 'staging' in options.keys() and staging_wrapper or workspace_wrapper
 
 #  ___             _ _     _
 # | _ \_  _ _ _   | (_)_ _| |_   _ __  __ _ ______
@@ -324,7 +331,7 @@ def pick_runner(options):
 # |_|_\\_,_|_||_| |_|_|_||_\__| | .__/\__,_/__/__/
 #                               |_|
 
-def run_external_linter(filename, linter):
+def run_external_linter(filename, linter, linter_name):
 
     """Run one linter against one file.
 
@@ -334,17 +341,20 @@ def run_external_linter(filename, linter):
     """
 
     def encode_shell_messages(prefix, messages):
-        return ['{}{}'.format(prefix, line.decode('utf-8'))
+        return ['{}{}'.format(prefix, line)
                 for line in messages.splitlines()]
 
 
-    cmd = linter['command'] + '"' + filename + '"'
+    cmd = linter['command'] + ' "' + filename + '"'
     (out, err, returncode) = get_shell_response(cmd)
-    if ((out and (linter.get('condition', 'error') == 'output')) or err or (not (returncode == 0L))):
-        prefix = linter.get('print', False) and '\t{}:'.format(filename) or '\t'
-        output = encode_shell_messages(prefix, out) + (err and encode_shell_messages(prefix, err) or [])
-        return ((returncode or 1), output)
-    return (0, [])
+    failed = ((out and (linter.get('condition', 'error') == 'output')) or err or (not (returncode == 0)))
+    if not failed:
+        return (filename, linter_name, 0, [])
+
+    prefix = linter.get('print', False) and '\t{}:'.format(filename) or '\t'
+    output = encode_shell_messages(prefix, out) + (err and encode_shell_messages(prefix, err) or [])
+    return (filename, linter_name, (returncode or 1), output)
+
 
 
 def run_one_linter(linter, filenames):
@@ -356,11 +366,10 @@ def run_one_linter(linter, filenames):
     result as a list of successes and failures.  Failures have a
     return code and the output of the lint process.
     """
-
+    linter_name, config = list(linter.items()).pop()
     match_filter = make_match_filter(linter)
-    config = linter.values()[0]
     files = set([file for file in filenames if match_filter(file)])
-    return [run_external_linter(file, config) for file in files]
+    return [run_external_linter(file, config, linter_name) for file in files]
 
 
 def build_lint_runner(linters, filenames):
@@ -372,7 +381,8 @@ def build_lint_runner(linters, filenames):
     """
     def lint_runner():
         keys = sorted(linters.keys())
-        return [run_one_linter({key: linters[key]}, filenames) for key in keys]
+        return reduce(operator.add,
+                      [run_one_linter({key: linters[key]}, filenames) for key in keys], [])
     return lint_runner
 
 
@@ -383,26 +393,31 @@ def build_lint_runner(linters, filenames):
 #
 
 
-def run_gitlint(options, config, extras):
+def run_gitlint(cmdline, config, extras):
 
     def build_config_subset(keys):
         """ Returns a subset of the configuration, with only those linters mentioned in keys """
         return {item[0]: item[1] for item in config.items() if item[0] in keys}
 
     """ Runs the requested linters """
-    all_files = get_filelist(options)
-    runner = pick_runner(options)
-    lintable = make_match_filter(config)
-    lintable_files = set([file for file in all_files if lintable(file)])
-    unlintables = (set(all_files) - lintable_files)
+    all_files = get_filelist(cmdline, extras)
+    stash_runner = pick_stash_runner(cmdline)
+    is_lintable = make_match_filter(config)
+    lintable_files = set([file for file in all_files if is_lintable(file)])
+    unlintable_files = (set(all_files) - lintable_files)
     working_linters = get_working_linters(config)
     broken_linters = (set(config) - set(working_linters))
-    cant_lint = make_match_filter(subset_config(config, broken_linters))
-    cant_lintable = set([file for file in lintable_files if cant_lint(file)])
+    cant_lint_filter = make_match_filter(build_config_subset(broken_linters))
+    cant_lint_files = set([file for file in lintable_files if cant_lint_filter(file)])
     lint_runner = build_lint_runner(build_config_subset(working_linters), lintable_files)
-    results = runner(lint_runner)
-    print(list(results))
-    return results
+    results = stash_runner(lint_runner)
+    print("Lintable:", lintable_files)
+    print("Unlintable:", ", ".join(unlintable_files))
+    print("Broken Linters:", ", ".join(broken_linters))
+    print("Can't Lint, Broken Linter:", "\n\t".join(cant_lint_files))
+    max_code = max(*[i[2] for i in results if len(i)])
+    print("\n".join(reduce(operator.add, [i[3] for i in results if len(i)], [])))
+    return max_code
 
 
 def main(*args):
@@ -416,21 +431,21 @@ def main(*args):
         '0.0.4')
 
     try:
-        options = opts.get_options()
-        config = get_config(options, git_base)
-        if 'help' in options:
+        cmdline = opts.get_options()
+        config = get_config(cmdline, git_base)
+        if 'help' in cmdline:
             opts.print_help()
             return 0
 
-        if 'version' in options:
+        if 'version' in cmdline:
             opts.print_version()
             return 0
 
-        if 'linters' in options:
+        if 'linters' in cmdline:
             opts.print_linters()
             return 0
 
-        return run_gitlint(options, config, opts.filenames)
+        return run_gitlint(cmdline, config, opts.filenames)
 
     except getopt.GetoptError as err:
         opts.print_help()
