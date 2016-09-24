@@ -8,7 +8,7 @@ condition = output
 
 [jshint]
 output = Running Jshint...
-command = jshint -c %(repdir)s/.git-lint/jshint.rc
+command = jshint -c %(repodir)s/.git-lint/jshint.rc
 match = .js
 print = False
 condition = error
@@ -22,7 +22,7 @@ condition = error
 
 [jscs]
 output = Running JSCS...
-command = jscs -c %(repdir)s/.git-lint/jscs.rc
+command = jscs -c %(repodir)s/.git-lint/jscs.rc
 match = .js
 print = False
 condition = error

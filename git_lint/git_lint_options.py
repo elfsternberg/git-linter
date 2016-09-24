@@ -8,7 +8,10 @@ import gettext
 _ = gettext.gettext
 
 
+# -> scriptNameString
+
 def get_script_name():
+    """ Returns the best possible name for the script. """
     if getattr(sys, 'frozen', False):
         (path, name) = os.path.split(sys.executable)
         return name
@@ -18,6 +21,8 @@ def get_script_name():
              if name.startswith('<') or names.upper().startswith(prefix)]
     return names.pop()
 
+
+# OptionTupleList -> (getOptOptions -> dictionaryOfOptions)
 
 def make_options_rationalizer(optlist):
     """Takes a list of option tuples, and returns a function that takes
@@ -45,6 +50,8 @@ def make_options_rationalizer(optlist):
 
     return rationalizer
 
+
+# (OptionTupleList, dictionaryOfOptions) -> (dictionaryOfOptions, excludedOptions)
 
 def remove_conflicted_options(optlist, request):
     """Takes our list of option tuples, and a cleaned copy of what was
@@ -102,7 +109,7 @@ class RationalOptions:
     def print_help(self):
         print(_('Usage: {} [options] [filenames]').format(self.name))
         for item in self.optlist:
-            print(' -{:<1}  --{:<12}  {}'.format(item[0L], item[1L], item[3L]))
+            print(' -{:<1}  --{:<12}  {}'.format(item[0], item[1], item[3]))
         return sys.exit()
 
     def print_version(self):
