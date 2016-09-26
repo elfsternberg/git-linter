@@ -39,6 +39,10 @@ OPTIONS_LIST = [
      _("Report lint failures only for diff'd sections"), ['complete']),
     ('p', 'complete', False,
      _('Report lint failures for all files'), []),
+    ('t', 'bylinter', False,
+     _('Group the reports by linter first as they appear in the config file [default]'), []),
+    ('f', 'byfile', False,
+     _('Group the reports by file first'), []),
     ('d', 'dryrun', False,
      _('Dry run - report what would be done, but do not run linters'), []),
     ('c', 'config', True,
@@ -49,11 +53,11 @@ OPTIONS_LIST = [
      _('Version information'), [])
 ]
 
-#   ___                              _   _    _          
-#  / __|___ _ __  _ __  __ _ _ _  __| | | |  (_)_ _  ___ 
+#   ___                              _   _    _
+#  / __|___ _ __  _ __  __ _ _ _  __| | | |  (_)_ _  ___
 # | (__/ _ \ '  \| '  \/ _` | ' \/ _` | | |__| | ' \/ -_)
 #  \___\___/_|_|_|_|_|_\__,_|_||_\__,_| |____|_|_||_\___|
-#                                                        
+#
 
 
 # This was a lot shorter and smarter in Hy...
@@ -65,28 +69,27 @@ def make_rational_options(optlist, args):
             the output of getopt and reduces it to the longopt key and
             associated values as a dictionary.
         """
-    
+
         def make_opt_assoc(prefix, pos):
             def associater(acc, it):
                 acc[(prefix + it[pos])] = it[1]
                 return acc
             return associater
-    
+
         short_opt_assoc = make_opt_assoc('-', 0)
         long_opt_assoc = make_opt_assoc('--', 1)
-    
+
         def make_full_set(acc, i):
             return long_opt_assoc(short_opt_assoc(acc, i), i)
-    
+
         fullset = reduce(make_full_set, optlist, {})
-    
+
         def rationalizer(acc, it):
             acc[fullset[it[0]]] = it[1]
             return acc
-    
+
         return rationalizer
 
-    
     # (OptionTupleList, dictionaryOfOptions) -> (dictionaryOfOptions, excludedOptions)
     def remove_conflicted_options(optlist, request):
         """Takes our list of option tuples, and a cleaned copy of what was
@@ -96,7 +99,7 @@ def make_rational_options(optlist, args):
         """
         def get_excluded_keys(memo, opt):
             return memo + ((len(opt) > 4 and opt[4]) or [])
-    
+
         keys = request.keys()
         marked = [option for option in optlist if option[1] in keys]
         exclude = reduce(get_excluded_keys, marked, [])
@@ -104,7 +107,7 @@ def make_rational_options(optlist, args):
         cleaned = {key: request[key] for key in keys
                    if key not in excluded}
         return (cleaned, excluded)
-    
+
     def shortoptstogo(i):
         return i[0] + ((i[2] and ':') or '')
 
@@ -125,11 +128,11 @@ def make_rational_options(optlist, args):
 
     return (retoptions, filenames, excluded)
 
-#   ___           __ _        ___             _         
-#  / __|___ _ _  / _(_)__ _  | _ \___ __ _ __| |___ _ _ 
+#   ___           __ _        ___             _
+#  / __|___ _ _  / _(_)__ _  | _ \___ __ _ __| |___ _ _
 # | (__/ _ \ ' \|  _| / _` | |   / -_) _` / _` / -_) '_|
-#  \___\___/_||_|_| |_\__, | |_|_\___\__,_\__,_\___|_|  
-#                     |___/                             
+#  \___\___/_||_|_| |_\__, | |_|_\___\__,_\__,_\___|_|
+#                     |___/
 
 
 def find_config_file(options, base):
@@ -141,7 +144,7 @@ def find_config_file(options, base):
         3. The repository's root directory, as the file .git-lint/config
         4. The user's home directory, as file .git-lint
         5. The user's home directory, as the file .git-lint/config
-    
+
     If no configuration file is found, this is an error.
     """
 
@@ -186,18 +189,12 @@ def get_config(options, base):
     return [Linter(section, {k: v for (k, v) in configloader.items(section)})
             for section in configloader.sections()]
 
-def ckeys(config):
-    return [i.name for i in config]
 
-def cvals(config):
-    return [i.linter for i in config]
-    
-
-#   ___ _ _   
-#  / __(_) |_ 
+#   ___ _ _
+#  / __(_) |_
 # | (_ | |  _|
 #  \___|_|\__|
-#             
+#
 
 def get_git_response_raw(cmd):
     fullcmd = (['git'] + cmd)
@@ -224,7 +221,7 @@ def run_git_command(cmd):
     return subprocess.call(fullcmd,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE,
-                               universal_newlines=True)
+                           universal_newlines=True)
 
 
 def get_shell_response(fullcmd):
@@ -254,18 +251,18 @@ git_base = get_git_base()
 git_head = get_git_head()
 
 
-#  _   _ _   _ _ _ _   _        
+#  _   _ _   _ _ _ _   _
 # | | | | |_(_) (_) |_(_)___ ___
 # | |_| |  _| | | |  _| / -_|_-<
 #  \___/ \__|_|_|_|\__|_\___/__/
-#                               
+#
 
 def base_file_cleaner(files):
     return [file.replace(git_base + '/', '', 1) for file in files]
 
 
 def make_match_filter_matcher(extensions):
-    trimmed = [s.strip() for s in reduce(operator.add, 
+    trimmed = [s.strip() for s in reduce(operator.add,
                                          [ex.split(',') for ex in extensions], [])]
     cleaned = [re.sub(r'^\.', '', s) for s in trimmed]
     return re.compile(r'\.' + '|'.join(cleaned) + r'$')
@@ -280,11 +277,25 @@ def make_match_filter(config):
     return match_filter
 
 
-#   ___ _           _     _ _     _              
+# ICK.  Mutation, references, and hidden assignment.
+def group_by(iterable, field_id):
+    results = []
+    keys = {}
+    for obj in iterable:
+        key = obj[field_id]
+        if key in keys:
+            keys[key].append(obj)
+            continue
+        keys[key] = [obj]
+        results.append((key, keys[key]))
+    return results
+
+
+#   ___ _           _     _ _     _
 #  / __| |_  ___ __| |__ | (_)_ _| |_ ___ _ _ ___
 # | (__| ' \/ -_) _| / / | | | ' \  _/ -_) '_(_-<
 #  \___|_||_\___\__|_\_\ |_|_|_||_\__\___|_| /__/
-#                                                
+#
 
 def executable_exists(script, label):
     if not len(script):
@@ -306,7 +317,7 @@ def executable_exists(script, label):
                  [os.path.join(path, scriptname)
                   for path in os.environ.get('PATH').split(':')]
                  if is_executable(path)]
-    return (len(possibles) and possibles.pop(0)) or None
+    return (len(possibles) and possibles.pop(0)) or False
 
 
 def get_working_linter_names(config):
@@ -314,38 +325,40 @@ def get_working_linter_names(config):
             if executable_exists(i.linter['command'], i.name)]
 
 
+def get_linter_status(config):
+    working_linter_names = get_working_linter_names(config)
+    broken_linter_names = (set([i.name for i in config]) - set(working_linter_names))
+    return working_linter_names, broken_linter_names
+
+
 def print_linters(config):
     print(_('Currently supported linters:'))
-    working = get_working_linter_names(config)
-    broken = set([i.name for i in config]) - set(working)
+    working_linter_names, broken_linter_names = get_linter_status(config)
     for linter in config:
         print('{:<14} {}'.format(linter.name,
-                                 ((linter.name in broken and
+                                 ((linter.name in broken_linter_names and
                                    _('(WARNING: executable not found)') or
                                    linter.linter.get('comment', '')))))
 
 
-#   ___     _     _ _    _          __    __ _ _        
+#   ___     _     _ _    _          __    __ _ _
 #  / __|___| |_  | (_)__| |_   ___ / _|  / _(_) |___ ___
 # | (_ / -_)  _| | | (_-<  _| / _ \  _| |  _| | / -_|_-<
 #  \___\___|\__| |_|_/__/\__| \___/_|   |_| |_|_\___/__/
-#                                                       
+#
 
 def get_filelist(cmdline, extras):
     """ Returns the list of files against which we'll run the linters. """
 
-    
     def base_file_filter(files):
         """ Return the full path for all files """
         return [os.path.join(git_base, file) for file in files]
-
 
     def cwd_file_filter(files):
         """ Return the full path for only those files in the cwd and down """
         gitcwd = os.path.join(os.path.relpath(os.getcwd(), git_base), '')
         return base_file_filter([file for file in files
                                  if file.startswith(gitcwd)])
-
 
     def check_for_conflicts(filesets):
         """ Scan list of porcelain files for merge conflic state. """
@@ -356,7 +369,6 @@ def get_filelist(cmdline, extras):
                 _('Current repository contains merge conflicts. Linters will not be run.'))
         return filesets
 
-
     def remove_submodules(files):
         """ Remove all submodules from the list of files git-lint cares about. """
 
@@ -365,7 +377,6 @@ def get_filelist(cmdline, extras):
         submodule_names = [fixer_re.sub('', submodule.split(' ')[2])
                            for submodule in submodules]
         return [file for file in files if (file not in submodule_names)]
-
 
     def get_porcelain_status():
         """ Return the status of all files in the system. """
@@ -393,22 +404,19 @@ def get_filelist(cmdline, extras):
 
         return check_for_conflicts(parse_stream([], stream))
 
-
     def staging_list():
         """ Return the list of files added or modified to the stage """
 
         return [filename for (index, workspace, filename) in get_porcelain_status()
                 if index in ['A', 'M']]
 
-
     def working_list():
-        """ Return the list of files that have been modified in the workspace.  
-        
+        """ Return the list of files that have been modified in the workspace.
+
         Includes the '?' to include files that git is not currently tracking.
         """
         return [filename for (index, workspace, filename) in get_porcelain_status()
                 if workspace in ['A', 'M', '?']]
-
 
     def all_list():
         """ Return all the files git is currently tracking for this repository. """
@@ -421,25 +429,25 @@ def get_filelist(cmdline, extras):
         extras_fullpathed = set([os.path.abspath(os.path.join(cwd, f)) for f in extras])
         not_found = set([f for f in extras_fullpathed if not os.path.isfile(f)])
         return ([os.path.relpath(f, cwd) for f in (extras_fullpathed - not_found)], not_found)
-    
+
     working_directory_trans = cwd_file_filter
     if 'base' in cmdline or 'every' in cmdline:
         working_directory_trans = base_file_filter
 
     file_list_generator = working_list
-    if 'all' in keys:
+    if 'all' in cmdline:
         file_list_generator = all_list
-    if 'staging' in keys:
+    if 'staging' in cmdline:
         file_list_generator = staging_list
 
     return (working_directory_trans(remove_submodules(file_list_generator())), [])
 
 
-#  ___ _             _                                                
-# / __| |_ __ _ __ _(_)_ _  __ _  __ __ ___ _ __ _ _ __ _ __  ___ _ _ 
+#  ___ _             _
+# / __| |_ __ _ __ _(_)_ _  __ _  __ __ ___ _ __ _ _ __ _ __  ___ _ _
 # \__ \  _/ _` / _` | | ' \/ _` | \ V  V / '_/ _` | '_ \ '_ \/ -_) '_|
-# |___/\__\__,_\__, |_|_||_\__, |  \_/\_/|_| \__,_| .__/ .__/\___|_|  
-#              |___/       |___/                  |_|  |_|            
+# |___/\__\__,_\__, |_|_||_\__, |  \_/\_/|_| \__,_| .__/ .__/\___|_|
+#              |___/       |___/                  |_|  |_|
 
 def pick_stash_runner(cmdline):
     """Choose a runner.
@@ -467,11 +475,11 @@ def pick_stash_runner(cmdline):
             os.utime(filename, timepair)
         return results
 
-    
     def workspace_wrapper(run_linters):
         return run_linters()
 
     return ('staging' in cmdline and staging_wrapper) or workspace_wrapper
+
 
 #  ___             _ _     _
 # | _ \_  _ _ _   | (_)_ _| |_   _ __  __ _ ______
@@ -492,21 +500,19 @@ def run_external_linter(filename, linter, linter_name):
         return ['{}{}'.format(prefix, line)
                 for line in messages.splitlines()]
 
-
     cmd = linter['command'] + ' "' + filename + '"'
     (out, err, returncode) = get_shell_response(cmd)
     failed = ((out and (linter.get('condition', 'error') == 'output')) or err or (not (returncode == 0)))
+    trimmed_filename = filename.replace(git_base + '/', '', 1)
     if not failed:
-        return (filename, linter_name, 0, [])
+        return (trimmed_filename, linter_name, 0, [])
 
-    prefix = (linter.get('print', False) and '\t{}: '.format(filename)) or '\t'
-    output = encode_shell_messages(prefix, out) + ((err and encode_shell_messages(prefix, err)) or [])
-    return (filename, linter_name, (returncode or 1), output)
-
+    prefix = ((linter.get('print', 'false').strip().lower() != 'true') and '  ') or '   {}: '.format(trimmed_filename)
+    output = base_file_cleaner(encode_shell_messages(prefix, out) + ((err and encode_shell_messages(prefix, err)) or []))
+    return (trimmed_filename, linter_name, (returncode or 1), output)
 
 
 def run_one_linter(linter, filenames):
-
     """ Runs one linter against a set of files
 
     Creates a match filter for the linter, extract the files to be
@@ -514,10 +520,9 @@ def run_one_linter(linter, filenames):
     result as a list of successes and failures.  Failures have a
     return code and the output of the lint process.
     """
-    linter_name, config = list(linter.items()).pop()
-    match_filter = make_match_filter(linter)
+    match_filter = make_match_filter([linter])
     files = set([file for file in filenames if match_filter(file)])
-    return [run_external_linter(file, config, linter_name) for file in files]
+    return [run_external_linter(file, linter.linter, linter.name) for file in files]
 
 
 def build_lint_runner(linters, filenames):
@@ -528,9 +533,8 @@ def build_lint_runner(linters, filenames):
     runner to better handle stashing and restoring a staged commit.
     """
     def lint_runner():
-        keys = sorted(linters.keys())
         return reduce(operator.add,
-                      [run_one_linter({key: linters[key]}, filenames) for key in keys], [])
+                      [run_one_linter(linter, filenames) for linter in linters], [])
     return lint_runner
 
 
@@ -540,6 +544,19 @@ def build_lint_runner(linters, filenames):
 # |_|  |_\__,_|_|_||_|
 #
 
+def print_report(results, config):
+    sort_position = 1
+    grouping = 'Linter: {}'
+    if 'byfile' in config:
+        sort_position = 0
+        grouping = 'Filename: {}'
+    grouped_results = group_by(results, sort_position)
+    for group in grouped_results:
+        print(grouping.format(group[0]))
+        for (filename, lintername, returncode, text) in group[1]:
+            print("\n".join(text))
+        print("")
+
 
 def run_gitlint(cmdline, config, extras):
 
@@ -548,23 +565,26 @@ def run_gitlint(cmdline, config, extras):
         return [item for item in config if item.name in keys]
 
     """ Runs the requested linters """
-    (all_filenames, unfindable_filenames) = get_filelist(cmdline, extras)
-
+    all_filenames, unfindable_filenames = get_filelist(cmdline, extras)
     stash_runner = pick_stash_runner(cmdline)
+
     is_lintable = make_match_filter(config)
-    lintable_filenames = set([filename for filename in all_filenames if is_lintable(filename)])
+    lintable_filenames = set([filename for filename in all_filenames
+                              if is_lintable(filename)])
     unlintable_filenames = set(all_filenames) - lintable_filenames
 
-    working_linter_names = get_working_linter_names(config)
-    broken_linter_names = (set([i.name for i in config]) - set(working_linter_names))
-    cant_lint_filter = make_match_filter(build_config_subset(broken_linter_names))
-    cant_lint_filenames = [filename for filename in lintable_filenames if cant_lint_filter(filename)]
+    working_linter_names, broken_linter_names = get_linter_status(config)
+    cant_lint_filter = make_match_filter(build_config_subset(
+        broken_linter_names))
+    cant_lint_filenames = [filename for filename in lintable_filenames
+                           if cant_lint_filter(filename)]
 
-    lint_runner = build_lint_runner(build_config_subset(working_linters), lintable_files)
+    lint_runner = build_lint_runner(
+        build_config_subset(working_linter_names), sorted(lintable_filenames))
 
     results = stash_runner(lint_runner)
 
-    print(list(results))
+    print_report(results, cmdline)
     return max([i[2] for i in results if len(i)])
 
 
