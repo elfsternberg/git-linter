@@ -2,7 +2,12 @@
 History
 =======
 
-0.0.2 (2016-09-13)
+0.0.2 (2015-05-22)
 ------------------
 
-* First release on PyPI.
+Pre-commit version
+
+0.0.04 (2016-09-26)
+-------------------
+
+Moved to "git lint" and optioned the hell out of it.

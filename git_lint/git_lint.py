@@ -459,12 +459,12 @@ def pick_stash_runner(cmdline):
     constantly monitoring file times.
     """
 
-    def staging_wrapper(run_linters):
+    def staging_wrapper(run_linters, filenames):
         def time_gather(f):
             stats = os.stat(f)
-            return (f, (stats.atime, stats.mtime))
+            return (f, (stats.st_atime, stats.st_mtime))
 
-        times = [time_gather(file) for file in files]
+        times = [time_gather(file) for file in filenames]
         run_git_command(['stash', '--keep-index'])
 
         results = run_linters()
@@ -475,7 +475,7 @@ def pick_stash_runner(cmdline):
             os.utime(filename, timepair)
         return results
 
-    def workspace_wrapper(run_linters):
+    def workspace_wrapper(run_linters, filenames):
         return run_linters()
 
     return ('staging' in cmdline and staging_wrapper) or workspace_wrapper
@@ -579,12 +579,18 @@ def run_gitlint(cmdline, config, extras):
     cant_lint_filenames = [filename for filename in lintable_filenames
                            if cant_lint_filter(filename)]
 
+    if 'dryrun' in cmdline:
+        return dryrun(
+            build_config_subset(working_linter_names), sorted(lintable_filenames))
+
     lint_runner = build_lint_runner(
         build_config_subset(working_linter_names), sorted(lintable_filenames))
 
-    results = stash_runner(lint_runner)
+    results = stash_runner(lint_runner, lintable_filenames)
 
     print_report(results, cmdline)
+    if not len(results):
+        return 0
     return max([i[2] for i in results if len(i)])
 
 
