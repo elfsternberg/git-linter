@@ -508,8 +508,10 @@ def run_external_linter(filename, linter, linter_name):
     if not failed:
         return (trimmed_filename, linter_name, 0, [])
 
-    prefix = ((linter.get('print', 'false').strip().lower() != 'true') and '  ') or '   {}: '.format(trimmed_filename)
-    output = base_file_cleaner(encode_shell_messages(prefix, out) + ((err and encode_shell_messages(prefix, err)) or []))
+    prefix = (((linter.get('print', 'false').strip().lower() != 'true') and '  ')
+              or '   {}: '.format(trimmed_filename))
+    output = (encode_shell_messages(prefix, out) +
+              ((err and encode_shell_messages(prefix, err)) or []))
     return (trimmed_filename, linter_name, (returncode or 1), output)
 
 
