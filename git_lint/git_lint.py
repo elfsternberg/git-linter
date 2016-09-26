@@ -16,9 +16,6 @@ except ImportError as e:
 
 _ = gettext.gettext
 
-def tap(a):
-    print("TAP:", a)
-    return a
 
 VERSION = '0.0.4'
 NAME = 'git-lint'
@@ -541,7 +538,9 @@ def build_lint_runner(linters, filenames):
                       [run_one_linter(linter, filenames) for linter in linters], [])
     return lint_runner
 
+
 def dryrun(linters, filenames):
+
     def dryrunonefile(filename, linter):
         trimmed_filename = filename.replace(git_base + '/', '', 1)
         return (trimmed_filename, linter.name, 0, ['    {}'.format(trimmed_filename)])
@@ -552,9 +551,6 @@ def dryrun(linters, filenames):
         return [dryrunonefile(filename, linter) for filename in files_to_check]
 
     return reduce(operator.add, [dryrunonce(linter, filenames) for linter in linters], [])
-        
-        
-        
     
 
 #  __  __      _
