@@ -1,7 +1,11 @@
 import sys
 import os.path
 import gettext
-import ConfigParser
+try:
+    import configparser
+except ImportError as e:
+    import ConfigParser as configparser
+    
 
 _ = gettext.gettext
 
@@ -56,7 +60,7 @@ def get_config(options, base):
     """
 
     path = find_config_file(options, base)
-    configloader = ConfigParser.SafeConfigParser()
+    configloader = configparser.SafeConfigParser()
     configloader.read(path)
     configloader.set('DEFAULT', 'repodir', base)
     return {section: {k: v for (k, v) in configloader.items(section)}
