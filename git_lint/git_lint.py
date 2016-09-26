@@ -6,15 +6,23 @@ import os
 import re
 import subprocess
 import sys
-from git_lint_options import RationalOptions
+import pprint
+from git_lint_options import make_rational_options
 from git_lint_config import get_config
 
 _ = gettext.gettext
 
-VERSION = '0.0.2'
+VERSION = '0.0.4'
+NAME = 'git-lint'
 
 
-optlist = [
+#   ___                              _   _    _          
+#  / __|___ _ __  _ __  __ _ _ _  __| | | |  (_)_ _  ___ 
+# | (__/ _ \ '  \| '  \/ _` | ' \/ _` | | |__| | ' \/ -_)
+#  \___\___/_|_|_|_|_|_\__,_|_||_\__,_| |____|_|_||_\___|
+#                                                        
+
+OPTIONS_LIST = [
     ('o', 'only', True,
      _('A comma-separated list of only those linters to run'), ['exclude']),
     ('x', 'exclude', True,
@@ -35,6 +43,8 @@ optlist = [
      _("Report lint failures only for diff'd sections"), ['complete']),
     ('p', 'complete', False,
      _('Report lint failures for all files'), []),
+    ('d', 'dryrun', False,
+     _('Dry run - report what would be done, but do not run linters'), []),
     ('c', 'config', True,
      _('Path to config file'), []),
     ('h', 'help', False,
@@ -42,6 +52,75 @@ optlist = [
     ('v', 'version', False,
      _('Version information'), [])]
 
+
+# This was a lot shorter and smarter in Hy...
+def make_rational_options(optlist, args):
+
+    # OptionTupleList -> (getOptOptions -> dictionaryOfOptions)
+    def make_options_rationalizer(optlist):
+        """Takes a list of option tuples, and returns a function that takes
+            the output of getopt and reduces it to the longopt key and
+            associated values as a dictionary.
+        """
+    
+        def make_opt_assoc(prefix, pos):
+            def associater(acc, it):
+                acc[(prefix + it[pos])] = it[1]
+                return acc
+            return associater
+    
+        short_opt_assoc = make_opt_assoc('-', 0)
+        long_opt_assoc = make_opt_assoc('--', 1)
+    
+        def make_full_set(acc, i):
+            return long_opt_assoc(short_opt_assoc(acc, i), i)
+    
+        fullset = reduce(make_full_set, optlist, {})
+    
+        def rationalizer(acc, it):
+            acc[fullset[it[0]]] = it[1]
+            return acc
+    
+        return rationalizer
+
+    
+    # (OptionTupleList, dictionaryOfOptions) -> (dictionaryOfOptions, excludedOptions)
+    def remove_conflicted_options(optlist, request):
+        """Takes our list of option tuples, and a cleaned copy of what was
+            requested from getopt, and returns a copy of the request
+            without any options that are marked as superseded, along with
+            the list of superseded options
+        """
+        def get_excluded_keys(memo, opt):
+            return memo + (len(opt) > 4 and opt[4] or [])
+    
+        keys = request.keys()
+        marked = [option for option in optlist if option[1] in keys]
+        exclude = reduce(get_excluded_keys, marked, [])
+        excluded = [key for key in keys if key in exclude]
+        cleaned = {key: request[key] for key in keys
+                   if key not in excluded}
+        return (cleaned, excluded)
+    
+    def shortoptstogo(i):
+        return i[0] + (i[2] and ':' or '')
+
+    def longoptstogo(i):
+        return i[1] + (i[2] and '=' or '')
+
+    optstringsshort = ''.join([shortoptstogo(opt) for opt in optlist])
+    optstringslong = [longoptstogo(opt) for opt in optlist]
+    (options, filenames) = getopt.getopt(args[1:], optstringsshort,
+                                         optstringslong)
+
+    # Turns what getopt returns into something more human-readable
+    rationalize_options = make_options_rationalizer(optlist)
+
+    # Remove any options that are superseded by others.
+    (retoptions, excluded) = remove_conflicted_options(
+        optlist, reduce(rationalize_options, options, {}))
+
+    return (retoptions, filenames, excluded)
 
 #   ___ _ _   
 #  / __(_) |_ 
@@ -181,9 +260,10 @@ def print_linters(config):
 #  \___\___|\__| |_|_/__/\__| \___/_|   |_| |_|_\___/__/
 #                                                       
 
-def get_filelist(options):
+def get_filelist(cmdline, extras):
     """ Returns the list of files against which we'll run the linters. """
 
+    
     def base_file_filter(files):
         """ Return the full path for all files """
         return [os.path.join(git_base, file) for file in files]
@@ -265,10 +345,16 @@ def get_filelist(options):
         return [file for file in get_git_response(cmd).split(u'\x00')
                 if len(file) > 0]
 
+    if len(extras):
+        cwd = os.path.abspath(os.getcwd())
+        extras_fullpathed = set([os.path.join(cwd, f) for f in extras])
+        not_found = set([f for f in extras_fullpathed if not os.path.isfile(f)])
+        for f in not_found:
+            print(_("File not found: {}").format(f))
+        return [os.path.relpath(f, cwd) for f in (extras_fullpathed - not_found)]
     
-    keys = options.keys()
     working_directory_trans = cwd_file_filter
-    if len(set(keys) & set(['base', 'every'])):
+    if 'base' in cmdline or 'every' in cmdline:
         working_directory_trans = base_file_filter
 
     file_list_generator = working_list
@@ -286,7 +372,7 @@ def get_filelist(options):
 # |___/\__\__,_\__, |_|_||_\__, |  \_/\_/|_| \__,_| .__/ .__/\___|_|  
 #              |___/       |___/                  |_|  |_|            
 
-def pick_runner(options):
+def pick_runner(cmdline):
     """Choose a runner.
 
     This is the operation that will run the linters.  It exists to
@@ -316,7 +402,7 @@ def pick_runner(options):
     def workspace_wrapper(run_linters):
         return run_linters()
 
-    return staging in options.keys() and staging_wrapper or workspace_wrapper
+    return 'staging' in cmdline and staging_wrapper or workspace_wrapper
 
 #  ___             _ _     _
 # | _ \_  _ _ _   | (_)_ _| |_   _ __  __ _ ______
@@ -383,15 +469,16 @@ def build_lint_runner(linters, filenames):
 #
 
 
-def run_gitlint(options, config, extras):
+def run_gitlint(cmdline, config, extras):
 
     def build_config_subset(keys):
         """ Returns a subset of the configuration, with only those linters mentioned in keys """
         return {item[0]: item[1] for item in config.items() if item[0] in keys}
 
     """ Runs the requested linters """
-    all_files = get_filelist(options)
-    runner = pick_runner(options)
+    all_files = get_filelist(cmdline, extras)
+    runner = pick_runner(cmdline)
+
     lintable = make_match_filter(config)
     lintable_files = set([file for file in all_files if lintable(file)])
     unlintables = (set(all_files) - lintable_files)
@@ -400,41 +487,55 @@ def run_gitlint(options, config, extras):
     cant_lint = make_match_filter(subset_config(config, broken_linters))
     cant_lintable = set([file for file in lintable_files if cant_lint(file)])
     lint_runner = build_lint_runner(build_config_subset(working_linters), lintable_files)
+
     results = runner(lint_runner)
+
     print(list(results))
     return results
 
 
+def print_help():
+    print(_('Usage: {} [options] [filenames]').format(NAME))
+    for item in OPTIONS_LIST:
+        print(' -{:<1}  --{:<12}  {}'.format(item[0], item[1], item[3]))
+    return sys.exit()
+
+
+def print_version():
+    print('{} {} Copyright (c) 2009, 2016 Kennth M. "Elf" Sternberg'.format(NAME, VERSION))
+
+
 def main(*args):
     if git_base is None:
-        sys.exit(_('Not currently in a git repository.'))
+        sys.exit(_('A git repository was not found.'))
 
-    opts = RationalOptions(
-        optlist, args,
-        'git lint',
-        'Copyright (c) 2008, 2016 Kenneth M. "Elf" Sternberg <elf.sternberg@gmail.com>',
-        '0.0.4')
+    (cmdline, filenames, excluded_commands) = make_rational_options(OPTIONS_LIST, args)
+
+    if len(excluded_commands) > 0:
+        print(_('These command line options were ignored due to option precedence.'))
+        for exc in excluded_commands:
+            print "\t{}".format(exc)
 
     try:
-        options = opts.get_options()
-        config = get_config(options, git_base)
-        if 'help' in options:
-            opts.print_help()
+        config = get_config(cmdline, git_base)
+
+        if 'help' in cmdline:
+            print_help()
             return 0
 
-        if 'version' in options:
-            opts.print_version()
+        if 'version' in cmdline:
+            print_version()
             return 0
 
-        if 'linters' in options:
-            opts.print_linters()
+        if 'linters' in cmdline:
+            print_linters(config)
             return 0
 
-        return run_gitlint(options, config, opts.filenames)
+        return run_gitlint(cmdline, config, filenames)
 
     except getopt.GetoptError as err:
-        opts.print_help()
-        return 0
+        print_help(OPTIONS_LIST)
+        return 1
 
 
 if __name__ == '__main__':
