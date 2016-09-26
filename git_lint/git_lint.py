@@ -16,6 +16,10 @@ except ImportError as e:
 
 _ = gettext.gettext
 
+def tap(a):
+    print("TAP:", a)
+    return a
+
 VERSION = '0.0.4'
 NAME = 'git-lint'
 OPTIONS_LIST = [
@@ -537,6 +541,21 @@ def build_lint_runner(linters, filenames):
                       [run_one_linter(linter, filenames) for linter in linters], [])
     return lint_runner
 
+def dryrun(linters, filenames):
+    def dryrunonefile(filename, linter):
+        trimmed_filename = filename.replace(git_base + '/', '', 1)
+        return (trimmed_filename, linter.name, 0, ['    {}'.format(trimmed_filename)])
+
+    def dryrunonce(linter, filenames):
+        match_filter = make_match_filter([linter])
+        files_to_check = [filename for filename in filenames if match_filter(filename)]
+        return [dryrunonefile(filename, linter) for filename in files_to_check]
+
+    return reduce(operator.add, [dryrunonce(linter, filenames) for linter in linters], [])
+        
+        
+        
+    
 
 #  __  __      _
 # |  \/  |__ _(_)_ _
@@ -544,10 +563,11 @@ def build_lint_runner(linters, filenames):
 # |_|  |_\__,_|_|_||_|
 #
 
-def print_report(results, config):
+def print_report(results, cmdline, unlintable_filenames, cant_lint_filenames,
+                 broken_linter_names, unfindable_filenames):
     sort_position = 1
     grouping = 'Linter: {}'
-    if 'byfile' in config:
+    if 'byfile' in cmdline:
         sort_position = 0
         grouping = 'Filename: {}'
     grouped_results = group_by(results, sort_position)
@@ -556,6 +576,17 @@ def print_report(results, config):
         for (filename, lintername, returncode, text) in group[1]:
             print("\n".join(text))
         print("")
+    if len(broken_linter_names):
+        print("These linters could not be run:", ",".join(broken_linter_names))
+        if len(cant_lint_filenames):
+            print("As a result, these files were not linted:")
+            print("\n".join(["    {}".format(f) for f in cant_lint_filenames]))
+    if len(unlintable_filenames):
+        print("The following files had no recognizeable linters:")
+        print("\n".join(["    {}".format(f) for f in unlintable_filenames]))
+    if len(unfindable_filenames):
+        print("The following files could not be found:")
+        print("\n".join(["    {}".format(f) for f in unfindable_filenames]))
 
 
 def run_gitlint(cmdline, config, extras):
@@ -566,29 +597,38 @@ def run_gitlint(cmdline, config, extras):
 
     """ Runs the requested linters """
     all_filenames, unfindable_filenames = get_filelist(cmdline, extras)
+
     stash_runner = pick_stash_runner(cmdline)
 
     is_lintable = make_match_filter(config)
+
     lintable_filenames = set([filename for filename in all_filenames
                               if is_lintable(filename)])
+
     unlintable_filenames = set(all_filenames) - lintable_filenames
 
     working_linter_names, broken_linter_names = get_linter_status(config)
+
     cant_lint_filter = make_match_filter(build_config_subset(
         broken_linter_names))
+
     cant_lint_filenames = [filename for filename in lintable_filenames
                            if cant_lint_filter(filename)]
 
     if 'dryrun' in cmdline:
-        return dryrun(
-            build_config_subset(working_linter_names), sorted(lintable_filenames))
+        return print_report(
+            dryrun(
+                build_config_subset(working_linter_names), sorted(lintable_filenames)),
+            cmdline, unlintable_filenames, cant_lint_filenames,
+            broken_linter_names, unfindable_filenames)
 
     lint_runner = build_lint_runner(
         build_config_subset(working_linter_names), sorted(lintable_filenames))
 
     results = stash_runner(lint_runner, lintable_filenames)
 
-    print_report(results, cmdline)
+    print_report(results, cmdline, unlintable_filenames, cant_lint_filenames,
+                 broken_linter_names, unfindable_filenames)
     if not len(results):
         return 0
     return max([i[2] for i in results if len(i)])
