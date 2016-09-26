@@ -641,39 +641,3 @@ def print_version(name, version):
     print('{} {} Copyright (c) 2009, 2016 Kennth M. "Elf" Sternberg'.format(name, version))
 
 
-def main(*args):
-    if git_base is None:
-        sys.exit(_('A git repository was not found.'))
-
-    (cmdline, filenames, excluded_commands) = make_rational_options(OPTIONS_LIST, args)
-
-    if len(excluded_commands) > 0:
-        print(_('These command line options were ignored due to option precedence.'))
-        for exc in excluded_commands:
-            print("\t{}".format(exc))
-
-    try:
-        config = get_config(cmdline, git_base)
-
-        if 'help' in cmdline:
-            print_help(OPTIONS_LIST, NAME)
-            return 0
-
-        if 'version' in cmdline:
-            print_version(NAME, VERSION)
-            return 0
-
-        if 'linters' in cmdline:
-            print_linters(config)
-            return 0
-
-        return run_gitlint(cmdline, config, filenames)
-
-    except getopt.GetoptError as err:
-        print_help(OPTIONS_LIST)
-        return 1
-
-
-if __name__ == '__main__':
-    import sys
-    sys.exit(main(*sys.argv))
