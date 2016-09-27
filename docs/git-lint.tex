@@ -1,0 +1,159 @@
+\documentclass[english]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{babel}
+\usepackage{verbatim}
+
+%% do we have the `hyperref package?
+\IfFileExists{hyperref.sty}{
+   \usepackage[bookmarksopen,bookmarksnumbered]{hyperref}
+}{}
+
+%% do we have the `fancyhdr' package?
+\IfFileExists{fancyhdr.sty}{
+\usepackage[fancyhdr]{latex2man}
+}{
+%% do we have the `fancyheadings' package?
+\IfFileExists{fancyheadings.sty}{
+\usepackage[fancy]{latex2man}
+}{
+\usepackage[nofancy]{latex2man}
+\message{no fancyhdr or fancyheadings package present, discard it}
+}}
+
+\setDate{2016/09/26}    %%%% must be manually set, if rcsinfo is not present
+\setVersionWord{Version:}  %%% that's the default, no need to set it.
+\setVersion{0.4}
+
+\begin{document}
+
+\begin{Name}{1}{git-lint}{Elf M. Sternberg}{Utilities}{Git Lint - A smart lint wrapper around your git repository}
+  \Prog{Git Lint} - A smart wrapper around your git repository
+\end{Name}
+
+\section{Synopsis}
+%%%%%%%%%%%%%%%%%%
+
+\Prog{git-lint}
+        \oOptArg{-o}{ linters}
+        \oOptArg{-x}{ linters}
+        \oOpt{-l}
+        \oOpt{-b}
+        \oOpt{-a}
+        \oOpt{-e}
+        \oOpt{-w}
+        \oOpt{-s}
+        \oOpt{-g}
+        \oOpt{-p}
+        \oOpt{-t}
+        \oOpt{-f}
+        \oOpt{-d}
+        \oOptArg{-c}{ config-file}
+        \oOpt{-h}
+        \oOpt{-v}
+
+\section{Description}
+%%%%%%%%%%%%%%%%%%%%%
+\Prog{git-lint} provides a simple, single call to perform syntatic and stylistic
+checks of your repository, in order to ensure they comply with your standards
+before you commit your work.
+
+\section{Options}
+%%%%%%%%%%%%%%%%%
+\begin{Description}
+
+\item[\OptArg{-o}{ linters}]Specify the list of linters to run, excluding all others
+\item[\OptArg{-x}{ linters}]Specify the list of linters to exclude, running all others
+\item[\Opt{-l}]List configured linters.  The list will specify whether or not the
+  command line argument provided leads to an identifiable executable linter.
+\item[\Opt{-b}]Run check from the repository base, rather than the current working directory.
+\item[\Opt{-a}]Check all files, not just those that have changed.
+\item[\Opt{-e}]Check everything (short for {-a -b}).
+\item[\Opt{-w}]Check the workspace (default when run as \Prog{git-lint}).
+\item[\Opt{-s}]Check the staging area.  \Prog{git-lint} stashes the
+  current workspace, restoring it to the same state as the index.
+  After the check, \Prog{git-lint} restores the workspace and attempts
+  to reset all fill times correctly.
+
+  
+\item[\Opt{-g}]Only error if lint failures overlap diffed regions.
+\item[\Opt{-p}]Error if a lint failure happens anywhere in a checked file.
+\item[\Opt{-t}]Group output by linter first, then filenames [default].
+\item[\Opt{-f}]Group output by filenames first, then linter.
+\item[\Opt{-d}]Dryrun - Report what \Prog{git-lint} would do, but don't actually run linters.
+\item[\OptArg{-c}{ config-file}]Specify an alternative configuration file.
+\item[\Opt{-h}]Print short help message
+\item[\Opt{-v}]Print version information
+
+\end{Description}
+
+\section{Requirements}
+%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{description}\setlength{\itemsep}{0cm}
+\item[An IBM or Lenovo Thinkpad with HDAPS] \Prog{thinksaber} only
+  runs on laptops with accelerometers, which get their values through
+  the HDAPS joystick emulator.
+
+\item[PyGame] \Prog{thinksaber} uses the PyGame library
+  (www.pygame.org), which in turn has dependencies on the Simple
+  Direct Layer gaming library as well as Python.  Most Linux
+  distributions either come with this stock or provide it through the
+  installation tool.  Pygame is a dependency of a number of popular
+  Linux games, so if you have any games on your system it's entirely
+  likely this has already been done for you.
+
+\item[Make] If you want to install the system with the distributed
+     \File{Makefile}, you need GNU-\Prog{make}. If you don't have it, you
+     should execute the steps shown in the \File{Makefile} manually.
+
+\end{description}
+
+\section{Acknowledgements}
+%%%%%%%%%%%%%%%%%%%%%%
+
+\Prog{Thinksaber} is obviously inspired by the program MacSaber, and I'm
+grateful to the MacSaber people for assembling the Star Wars sound
+effects collection needed to make it so successful.
+
+\Prog{Thinksaber} uses a motion-detection algorithm derived from the
+one written by Tatsuhiko Miyagawa (miyagawa at gmail.com) for his own
+\Prog{thinkpad-saber} program, which ran only under Perl for Windows.
+Obviously, I think mine's better.
+
+\section{Changes}
+%@% IF LATEX %@%
+{\small\verbatiminput{CHANGES}}
+%@% ELSE %@%
+Please check the file \URL{CHANGES} for the list of changes.
+%@% END-IF %@%
+
+\section{Version}
+%%%%%%%%%%%%%%%%%
+
+Version: \Version\ of \Date.
+
+\section{License and Copyright}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{description}
+\item[Copyright] \copyright\ 2008, Elf M. Sternberg,
+     \Email{Elf.Sternberg@gmail.com}
+
+\item[License] This program can be redistributed and/or modified under
+  the terms of the GNU Public License, version 2.  You should have
+  found a copy of this licence with this distribution in the file
+  \File{COPYING}.
+
+\end{description}
+
+\section{Author}
+%%%%%%%%%%%%%%%%
+
+\noindent
+Elf M. Sternberg
+Email: \Email{Elf.Sternberg@gmail.com}  \\
+WWW: \URL{http://www.elfsternberg.com}.
+
+\LatexManEnd
+
+\end{document}
