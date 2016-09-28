@@ -1,4 +1,3 @@
-from __future__ import print_function
 from functools import reduce
 from collections import namedtuple
 import getopt
@@ -377,13 +376,12 @@ class Linters:
         if not failed:
             return (trimmed_filename, linter_name, 0, [])
         
-        prefix = (((linter.get('print', 'false').strip().lower() != 'true') and '  ')
-                  or '   {}: '.format(trimmed_filename))
+        prefix = (((linter.get('print', 'false').strip().lower() != 'true') and '  ') or
+                  '   {}: '.format(trimmed_filename))
         output = (Linters.encode_shell_messages(prefix, out) +
                   ((err and Linters.encode_shell_messages(prefix, err)) or []))
         return (trimmed_filename, linter_name, (returncode or 1), output)
     
-
     @staticmethod
     def run_one_linter(linter, filenames):
         """ Runs one linter against a set of files
@@ -397,7 +395,6 @@ class Linters:
         files = set([filename for filename in filenames if match_filter(filename)])
         return [Linters.run_external_linter(filename, linter.linter, linter.name) for filename in files]
 
-
     def __call__(self):
         """ Returns a function to run a set of linters against a set of filenames
 
@@ -406,7 +403,6 @@ class Linters:
         """
         return reduce(operator.add,
                       [Linters.run_one_linter(linter, self.filenames) for linter in self.linters], [])
-
 
     def dryrun(self):
 
@@ -420,7 +416,6 @@ class Linters:
             return [dryrunonefile(filename, linter) for filename in files_to_check]
         
         return reduce(operator.add, [dryrunonce(linter, self.filenames) for linter in self.linters], [])
-    
 
 
 def run_linters(options, config, extras):

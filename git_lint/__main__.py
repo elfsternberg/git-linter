@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 from .options import OPTIONS
 from .option_handler import cleanup_options
 from .reporters import print_report, print_help, print_linters
