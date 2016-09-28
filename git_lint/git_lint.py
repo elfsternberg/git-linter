@@ -19,40 +19,7 @@ _ = gettext.gettext
 
 VERSION = '0.0.4'
 NAME = 'git-lint'
-OPTIONS_LIST = [
-    ('o', 'only', True,
-     _('A comma-separated list of only those linters to run'), ['exclude']),
-    ('x', 'exclude', True,
-     _('A comma-separated list of linters to skip'), []),
-    ('l', 'linters', False,
-     _('Show the list of configured linters'), []),
-    ('b', 'base', False,
-     _('Check all changed files in the repository, not just those in the current directory.'), []),
-    ('a', 'all', False,
-     _('Scan all files in the repository, not just those that have changed.'), []),
-    ('e', 'every', False,
-     _('Short for -b -a: scan everything'), []),
-    ('w', 'workspace', False,
-     _('Scan the workspace'), ['staging']),
-    ('s', 'staging', False,
-     _('Scan the staging area (useful for pre-commit).'), []),
-    ('g', 'changes', False,
-     _("Report lint failures only for diff'd sections"), ['complete']),
-    ('p', 'complete', False,
-     _('Report lint failures for all files'), []),
-    ('t', 'bylinter', False,
-     _('Group the reports by linter first as they appear in the config file [default]'), []),
-    ('f', 'byfile', False,
-     _('Group the reports by file first'), []),
-    ('d', 'dryrun', False,
-     _('Dry run - report what would be done, but do not run linters'), []),
-    ('c', 'config', True,
-     _('Path to config file'), []),
-    ('h', 'help', False,
-     _('This help message'), []),
-    ('v', 'version', False,
-     _('Version information'), [])
-]
+
 
 #   ___                              _   _    _
 #  / __|___ _ __  _ __  __ _ _ _  __| | | |  (_)_ _  ___
@@ -60,74 +27,6 @@ OPTIONS_LIST = [
 #  \___\___/_|_|_|_|_|_\__,_|_||_\__,_| |____|_|_||_\___|
 #
 
-
-# This was a lot shorter and smarter in Hy...
-def make_rational_options(optlist, args):
-
-    # OptionTupleList -> (getOptOptions -> dictionaryOfOptions)
-    def make_options_rationalizer(optlist):
-        """Takes a list of option tuples, and returns a function that takes
-            the output of getopt and reduces it to the longopt key and
-            associated values as a dictionary.
-        """
-
-        def make_opt_assoc(prefix, pos):
-            def associater(acc, it):
-                acc[(prefix + it[pos])] = it[1]
-                return acc
-            return associater
-
-        short_opt_assoc = make_opt_assoc('-', 0)
-        long_opt_assoc = make_opt_assoc('--', 1)
-
-        def make_full_set(acc, i):
-            return long_opt_assoc(short_opt_assoc(acc, i), i)
-
-        fullset = reduce(make_full_set, optlist, {})
-
-        def rationalizer(acc, it):
-            acc[fullset[it[0]]] = it[1]
-            return acc
-
-        return rationalizer
-
-    # (OptionTupleList, dictionaryOfOptions) -> (dictionaryOfOptions, excludedOptions)
-    def remove_conflicted_options(optlist, request):
-        """Takes our list of option tuples, and a cleaned copy of what was
-            requested from getopt, and returns a copy of the request
-            without any options that are marked as superseded, along with
-            the list of superseded options
-        """
-        def get_excluded_keys(memo, opt):
-            return memo + ((len(opt) > 4 and opt[4]) or [])
-
-        keys = request.keys()
-        marked = [option for option in optlist if option[1] in keys]
-        exclude = reduce(get_excluded_keys, marked, [])
-        excluded = [key for key in keys if key in exclude]
-        cleaned = {key: request[key] for key in keys
-                   if key not in excluded}
-        return (cleaned, excluded)
-
-    def shortoptstogo(i):
-        return i[0] + ((i[2] and ':') or '')
-
-    def longoptstogo(i):
-        return i[1] + ((i[2] and '=') or '')
-
-    optstringsshort = ''.join([shortoptstogo(opt) for opt in optlist])
-    optstringslong = [longoptstogo(opt) for opt in optlist]
-    (options, filenames) = getopt.getopt(args[1:], optstringsshort,
-                                         optstringslong)
-
-    # Turns what getopt returns into something more human-readable
-    rationalize_options = make_options_rationalizer(optlist)
-
-    # Remove any options that are superseded by others.
-    (retoptions, excluded) = remove_conflicted_options(
-        optlist, reduce(rationalize_options, options, {}))
-
-    return (retoptions, filenames, excluded)
 
 #   ___           __ _        ___             _
 #  / __|___ _ _  / _(_)__ _  | _ \___ __ _ __| |___ _ _
@@ -587,6 +486,20 @@ def print_report(results, cmdline, unlintable_filenames, cant_lint_filenames,
         print("\n".join(["    {}".format(f) for f in unfindable_filenames]))
 
 
+
+
+def print_help(options_list, name):
+    print(_('Usage: {} [options] [filenames]').format(name))
+    for item in options_list:
+        print(' -{:<1}  --{:<12}  {}'.format(item[0], item[1], item[3]))
+    return sys.exit()
+
+
+def print_version(name, version):
+    print('{} {} Copyright (c) 2009, 2016 Kennth M. "Elf" Sternberg'.format(name, version))
+
+
+
 def run_gitlint(cmdline, config, extras):
 
     def build_config_subset(keys):
@@ -630,16 +543,3 @@ def run_gitlint(cmdline, config, extras):
     if not len(results):
         return 0
     return max([i[2] for i in results if len(i)])
-
-
-def print_help(options_list, name):
-    print(_('Usage: {} [options] [filenames]').format(name))
-    for item in options_list:
-        print(' -{:<1}  --{:<12}  {}'.format(item[0], item[1], item[3]))
-    return sys.exit()
-
-
-def print_version(name, version):
-    print('{} {} Copyright (c) 2009, 2016 Kennth M. "Elf" Sternberg'.format(name, version))
-
-

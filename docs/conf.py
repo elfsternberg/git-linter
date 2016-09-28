@@ -239,7 +239,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'git_lint',
+    ('manual', 'git-lint',
      u'Git Lint Documentation',
      [u'Kenneth M. "Elf" Sternberg'], 1)
 ]
