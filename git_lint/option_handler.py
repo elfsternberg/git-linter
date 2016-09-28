@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-#
 # Copyright (C) 2015 Elf M. Sternberg
 # Author: Elf M. Sternberg
-#
+
+import getopt
 
 # This was a lot shorter and smarter in Hy...
 
@@ -71,7 +70,7 @@ def cleanup_options(options, commandline):
 
     optstringsshort = ''.join([shortoptstogo(opt) for opt in options])
     optstringslong = [longoptstogo(opt) for opt in options]
-    (options, filenames) = getopt.getopt(commandline[1:],
+    (chosen_options, filenames) = getopt.getopt(commandline[1:],
                                          optstringsshort,
                                          optstringslong)
 
@@ -80,6 +79,6 @@ def cleanup_options(options, commandline):
 
     # Remove any options that are superseded by others.
     (ret, excluded) = remove_conflicted_options(
-        optlist, reduce(streamline_options, options, {}))
+        options, reduce(streamline_options, chosen_options, {}))
 
     return (ret, filenames, excluded)

@@ -17,10 +17,6 @@ except ImportError as e:
 _ = gettext.gettext
 
 
-VERSION = '0.0.4'
-NAME = 'git-lint'
-
-
 #   ___           __ _        ___             _
 #  / __|___ _ _  / _(_)__ _  | _ \___ __ _ __| |___ _ _
 # | (__/ _ \ ' \|  _| / _` | |   / -_) _` / _` / -_) '_|
@@ -170,20 +166,6 @@ class MatchFilter:
         return re.compile(r'\.' + '|'.join(cleaned) + r'$')
     
 
-# ICK.  Mutation, references, and hidden assignment.
-def group_by(iterable, field_id):
-    results = []
-    keys = {}
-    for obj in iterable:
-        key = obj[field_id]
-        if key in keys:
-            keys[key].append(obj)
-            continue
-        keys[key] = [obj]
-        results.append((key, keys[key]))
-    return results
-
-
 #   ___ _           _     _ _     _
 #  / __| |_  ___ __| |__ | (_)_ _| |_ ___ _ _ ___
 # | (__| ' \/ -_) _| / / | | | ' \  _/ -_) '_(_-<
@@ -222,16 +204,6 @@ def get_linter_status(config):
     working_linter_names = get_working_linter_names(config)
     broken_linter_names = (set([i.name for i in config]) - set(working_linter_names))
     return working_linter_names, broken_linter_names
-
-
-def print_linters(config):
-    print(_('Currently supported linters:'))
-    working_linter_names, broken_linter_names = get_linter_status(config)
-    for linter in config:
-        print('{:<14} {}'.format(linter.name,
-                                 ((linter.name in broken_linter_names and
-                                   _('(WARNING: executable not found)') or
-                                   linter.linter.get('comment', '')))))
 
 
 #   ___     _     _ _    _          __    __ _ _
@@ -345,9 +317,9 @@ def get_filelist(options, extras):
 
 class Runner:
     def __init__(self, options):
-        self.runner = ('staging' in options and self.staging_wrapper) or self.workspace_wrapper
+        self.runner = ('staging' in options and Runner.staging_wrapper) or Runner.workspace_wrapper
 
-    def __call__(run_linters, filenames):
+    def __call__(self, run_linters, filenames):
         return self.runner(run_linters, filenames)
 
     @staticmethod
@@ -378,8 +350,8 @@ class Runner:
 # |_|_\\_,_|_||_| |_|_|_||_\__| | .__/\__,_/__/__/
 #                               |_|
 
-class Linter:
-    def __init__(linters, filenames):
+class Linters:
+    def __init__(self, linters, filenames):
         self.linters = linters
         self.filenames = filenames
 
@@ -419,19 +391,19 @@ class Linter:
         result as a list of successes and failures.  Failures have a
         return code and the output of the lint process.
         """
-        match_filter = make_match_filter([linter])
+        match_filter = MatchFilter([linter])
         files = set([filename for filename in filenames if match_filter(filename)])
-        return [self.run_external_linter(filename, linter.linter, linter.name) for filename in files]
+        return [Linters.run_external_linter(filename, linter.linter, linter.name) for filename in files]
 
 
-    def __call__(self, linters, filenames):
+    def __call__(self):
         """ Returns a function to run a set of linters against a set of filenames
 
         This returns a function because it's going to be wrapped in a
         runner to better handle stashing and restoring a staged commit.
         """
         return reduce(operator.add,
-                      [run_one_linter(linter, self.filenames) for linter in self.linters], [])
+                      [Linters.run_one_linter(linter, self.filenames) for linter in self.linters], [])
 
 
     def dryrun(self):
@@ -480,10 +452,11 @@ def run_linters(options, config, extras):
                 broken_linter_names, unfindable_filenames)
 
     runner = Runner(options)
-    linter = Linter(build_config_subset(working_linter_names),
+
+    linters = Linters(build_config_subset(working_linter_names),
                     sorted(lintable_filenames))
-    results = runner(linter, lintable_filenames)
+
+    results = runner(linters, lintable_filenames)
 
     return (results, unlintable_filenames, cant_lint_filenames,
             broken_linter_names, unfindable_filenames)
-

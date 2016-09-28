@@ -1,18 +1,23 @@
 #!/usr/bin/env python
 from .options import OPTIONS
 from .option_handler import cleanup_options
-from .reporters import print_report, print_help
+from .reporters import print_report, print_help, print_linters
 from .git_lint import load_config, run_linters, git_base
 from getopt import GetoptError
+import sys
 
 import gettext
 _ = gettext.gettext
 
-def main(*args):
+NAME = 'git-lint'
+VERSION = '0.0.4'
+
+
+def main():
     if git_base is None:
         sys.exit(_('A git repository was not found.'))
 
-    (options, filenames, excluded_commands) = cleanup_options(OPTIONS, args)
+    (options, filenames, excluded_commands) = cleanup_options(OPTIONS, sys.argv)
 
     if len(excluded_commands) > 0:
         print(_('These command line options were ignored due to option precedence.'))
@@ -27,14 +32,14 @@ def main(*args):
             return 0
 
         if 'version' in options:
-            from .reporters get print_version
+            from .reporters import print_version
             print_version(NAME, VERSION)
             return 0
 
         if 'linters' in options:
-            from .gitSlint import get_linter_status
+            from .git_lint import get_linter_status
             working_linter_names, broken_linter_names = get_linter_status(config)
-            print_linters(working_linter_names, broken_linter_names))
+            print_linters(config, broken_linter_names)
             return 0
 
         (results,
@@ -62,4 +67,4 @@ def main(*args):
 
 if __name__ == '__main__':
     import sys
-    sys.exit(main(*sys.argv))
+    sys.exit(main())
