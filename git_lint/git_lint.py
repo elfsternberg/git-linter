@@ -219,8 +219,10 @@ def get_filelist(options, extras):
         """ Return the full path for all files """
         return [os.path.join(git_base, file) for file in files]
 
-    def cwd_file_filter(files):
+    def cwd_file_filter(filenames):
         """ Return the full path for only those files in the cwd and down """
+        if os.path.samefile(os.getcwd(), git_base):
+            return base_file_filter(filenames)
         gitcwd = os.path.join(os.path.relpath(os.getcwd(), git_base), '')
         return base_file_filter([file for file in files
                                  if file.startswith(gitcwd)])
@@ -377,8 +379,8 @@ class Linters:
         
         prefix = (((linter.get('print', 'false').strip().lower() != 'true') and '  ')
                   or '   {}: '.format(trimmed_filename))
-        output = (encode_shell_messages(prefix, out) +
-                  ((err and encode_shell_messages(prefix, err)) or []))
+        output = (Linters.encode_shell_messages(prefix, out) +
+                  ((err and Linters.encode_shell_messages(prefix, err)) or []))
         return (trimmed_filename, linter_name, (returncode or 1), output)
     
 
@@ -445,16 +447,15 @@ def run_linters(options, config, extras):
     cant_lint_filenames = [filename for filename in lintable_filenames
                            if cant_lint_filter(filename)]
 
-    if 'dryrun' in options:
-        dryrun_results = dryrun(
-            build_config_subset(working_linter_names), sorted(lintable_filenames))
-        return (dryrun_results, unlintable_filenames, cant_lint_filenames,
-                broken_linter_names, unfindable_filenames)
-
     runner = Runner(options)
 
     linters = Linters(build_config_subset(working_linter_names),
-                    sorted(lintable_filenames))
+                      sorted(lintable_filenames))
+
+    if 'dryrun' in options:
+        dryrun_results = linters.dryrun()
+        return (dryrun_results, unlintable_filenames, cant_lint_filenames,
+                broken_linter_names, unfindable_filenames)
 
     results = runner(linters, lintable_filenames)
 

@@ -47,23 +47,23 @@ def main():
          cant_lint_filenames,
          broken_linter_names,
          unfindable_filenames) = run_linters(options, config, filenames)
-
+        
         print_report(results,
                      unlintable_filenames,
                      cant_lint_filenames,
                      broken_linter_names,
                      unfindable_filenames,
                      options)
-
+        
         if not len(results):
             return 0
-
+        
         return max([i[2] for i in results if len(i)])
 
     except GetoptError as err:
         print_help(OPTIONS)
         return 1
-
+    
 
 if __name__ == '__main__':
     import sys
