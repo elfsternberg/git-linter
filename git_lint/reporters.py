@@ -2,6 +2,7 @@ from __future__ import print_function
 import gettext
 _ = gettext.gettext
 
+
 # ICK.  Mutation, references, and hidden assignment.
 def group_by(iterable, field_id):
     results = []
@@ -15,8 +16,9 @@ def group_by(iterable, field_id):
         results.append((key, keys[key]))
     return results
 
+
 def print_report(results, unlintable_filenames, cant_lint_filenames,
-                 broken_linter_names, unfindable_filenames, options = {'bylinter': True}):
+                 broken_linter_names, unfindable_filenames, options={'bylinter': True}):
     sort_position = 1
     grouping = _('Linter: {}')
     if 'byfile' in options:
@@ -48,7 +50,7 @@ def print_help(options, name):
 
 
 def print_version(name, version):
-    print(_('{} {} Copyright (c) 2009, 2016 Kennth M. "Elf" Sternberg')).format(name, version)
+    print(_('{} {} Copyright (c) 2009, 2016 Kennth M. "Elf" Sternberg').format(name, version))
 
 
 def print_linters(config, broken_linter_names):
