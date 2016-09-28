@@ -1,5 +1,7 @@
+import gettext
+_ = gettext.gettext
 
-OPTIONS_LIST = [
+OPTIONS = [
     ('o', 'only', True,
      _('A comma-separated list of only those linters to run'), ['exclude']),
     ('x', 'exclude', True,

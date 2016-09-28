@@ -23,13 +23,13 @@ test_requirements = [
 ]
 
 setup(
-    name='git_lint',
-    version='0.0.2',
+    name='git_linter',
+    version='0.0.4',
     description="A git command to lint everything in your workspace (or stage) that was changed since the last commit.",
     long_description=readme + '\n\n' + history,
-    author="Kenneth M. "Elf" Sternberg",
+    author='Kenneth M. "Elf" Sternberg',
     author_email='elf.sternberg@gmail.com',
-    url='https://github.com/elfsternberg/git_lint',
+    url='https://github.com/elfsternberg/git_linter',
     packages=[
         'git_lint',
     ],
@@ -37,16 +37,20 @@ setup(
                  'git_lint'},
     include_package_data=True,
     install_requires=requirements,
-    license="ISCL",
+    license="MIT",
     zip_safe=False,
-    keywords='git_lint',
+    keywords='git lint style syntaxt development',
+    entry_points={
+        'console_scripts': [
+            'git-lint = git_lint.__main__:main'
+        ]
+    },
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: ISC License (ISCL)',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',

@@ -21,13 +21,6 @@ VERSION = '0.0.4'
 NAME = 'git-lint'
 
 
-#   ___                              _   _    _
-#  / __|___ _ __  _ __  __ _ _ _  __| | | |  (_)_ _  ___
-# | (__/ _ \ '  \| '  \/ _` | ' \/ _` | | |__| | ' \/ -_)
-#  \___\___/_|_|_|_|_|_\__,_|_||_\__,_| |____|_|_||_\___|
-#
-
-
 #   ___           __ _        ___             _
 #  / __|___ _ _  / _(_)__ _  | _ \___ __ _ __| |___ _ _
 # | (__/ _ \ ' \|  _| / _` | |   / -_) _` / _` / -_) '_|
@@ -69,7 +62,7 @@ def find_config_file(options, base):
 
 
 # (commandLineDictionary, repositoryLocation) -> (configurationDictionary | exit)
-def get_config(options, base):
+def load_config(options, base):
     """Loads the git-lint configuration file.
 
     Returns the configuration file as a dictionary of dictionaries.
@@ -161,21 +154,21 @@ def base_file_cleaner(files):
     return [file.replace(git_base + '/', '', 1) for file in files]
 
 
-def make_match_filter_matcher(extensions):
-    trimmed = [s.strip() for s in reduce(operator.add,
-                                         [ex.split(',') for ex in extensions], [])]
-    cleaned = [re.sub(r'^\.', '', s) for s in trimmed]
-    return re.compile(r'\.' + '|'.join(cleaned) + r'$')
+class MatchFilter:
 
+    def __init__(self, config):
+        self.matcher = self.make_match_filter_matcher([v.linter.get('match', '') for v in config])
 
-def make_match_filter(config):
-    matcher = make_match_filter_matcher([v.linter.get('match', '') for v in config])
-
-    def match_filter(path):
-        return matcher.search(path)
-
-    return match_filter
-
+    def __call__(self, path):
+        return self.matcher.search(path)
+        
+    @staticmethod
+    def make_match_filter_matcher(extensions):
+        trimmed = [s.strip() for s in reduce(operator.add,
+                                             [ex.split(',') for ex in extensions], [])]
+        cleaned = [re.sub(r'^\.', '', s) for s in trimmed]
+        return re.compile(r'\.' + '|'.join(cleaned) + r'$')
+    
 
 # ICK.  Mutation, references, and hidden assignment.
 def group_by(iterable, field_id):
@@ -247,7 +240,7 @@ def print_linters(config):
 #  \___\___|\__| |_|_/__/\__| \___/_|   |_| |_|_\___/__/
 #
 
-def get_filelist(cmdline, extras):
+def get_filelist(options, extras):
     """ Returns the list of files against which we'll run the linters. """
 
     def base_file_filter(files):
@@ -331,13 +324,13 @@ def get_filelist(cmdline, extras):
         return ([os.path.relpath(f, cwd) for f in (extras_fullpathed - not_found)], not_found)
 
     working_directory_trans = cwd_file_filter
-    if 'base' in cmdline or 'every' in cmdline:
+    if 'base' in options or 'every' in options:
         working_directory_trans = base_file_filter
 
     file_list_generator = working_list
-    if 'all' in cmdline:
+    if 'all' in options:
         file_list_generator = all_list
-    if 'staging' in cmdline:
+    if 'staging' in options:
         file_list_generator = staging_list
 
     return (working_directory_trans(remove_submodules(file_list_generator())), [])
@@ -349,16 +342,15 @@ def get_filelist(cmdline, extras):
 # |___/\__\__,_\__, |_|_||_\__, |  \_/\_/|_| \__,_| .__/ .__/\___|_|
 #              |___/       |___/                  |_|  |_|
 
-def pick_stash_runner(cmdline):
-    """Choose a runner.
 
-    This is the operation that will run the linters.  It exists to
-    provide a way to stash the repository, then restore it when
-    complete.  If possible, it attempts to restore the access and
-    modification times of the file in order to comfort IDEs that are
-    constantly monitoring file times.
-    """
+class Runner:
+    def __init__(self, options):
+        self.runner = ('staging' in options and self.staging_wrapper) or self.workspace_wrapper
 
+    def __call__(run_linters, filenames):
+        return self.runner(run_linters, filenames)
+
+    @staticmethod
     def staging_wrapper(run_linters, filenames):
         def time_gather(f):
             stats = os.stat(f)
@@ -375,10 +367,9 @@ def pick_stash_runner(cmdline):
             os.utime(filename, timepair)
         return results
 
+    @staticmethod
     def workspace_wrapper(run_linters, filenames):
         return run_linters()
-
-    return ('staging' in cmdline and staging_wrapper) or workspace_wrapper
 
 
 #  ___             _ _     _
@@ -387,131 +378,87 @@ def pick_stash_runner(cmdline):
 # |_|_\\_,_|_||_| |_|_|_||_\__| | .__/\__,_/__/__/
 #                               |_|
 
-def run_external_linter(filename, linter, linter_name):
+class Linter:
+    def __init__(linters, filenames):
+        self.linters = linters
+        self.filenames = filenames
 
-    """Run one linter against one file.
-
-    If the result matches the error condition specified in the
-    configuration file, return the error code and messages, either
-    return nothing.
-    """
-
+    @staticmethod
     def encode_shell_messages(prefix, messages):
         return ['{}{}'.format(prefix, line)
                 for line in messages.splitlines()]
 
-    cmd = linter['command'] + ' "' + filename + '"'
-    (out, err, returncode) = get_shell_response(cmd)
-    failed = ((out and (linter.get('condition', 'error') == 'output')) or err or (not (returncode == 0)))
-    trimmed_filename = filename.replace(git_base + '/', '', 1)
-    if not failed:
-        return (trimmed_filename, linter_name, 0, [])
+    @staticmethod
+    def run_external_linter(filename, linter, linter_name):
+        """Run one linter against one file.
 
-    prefix = (((linter.get('print', 'false').strip().lower() != 'true') and '  ')
-              or '   {}: '.format(trimmed_filename))
-    output = (encode_shell_messages(prefix, out) +
-              ((err and encode_shell_messages(prefix, err)) or []))
-    return (trimmed_filename, linter_name, (returncode or 1), output)
+        If the result matches the error condition specified in the configuration file,
+        return the error code and messages, either return nothing.
+        """
 
-
-def run_one_linter(linter, filenames):
-    """ Runs one linter against a set of files
-
-    Creates a match filter for the linter, extract the files to be
-    linted, and runs the linter against each file, returning the
-    result as a list of successes and failures.  Failures have a
-    return code and the output of the lint process.
-    """
-    match_filter = make_match_filter([linter])
-    files = set([file for file in filenames if match_filter(file)])
-    return [run_external_linter(file, linter.linter, linter.name) for file in files]
-
-
-def build_lint_runner(linters, filenames):
-
-    """ Returns a function to run a set of linters against a set of filenames
-
-    This returns a function because it's going to be wrapped in a
-    runner to better handle stashing and restoring a staged commit.
-    """
-    def lint_runner():
-        return reduce(operator.add,
-                      [run_one_linter(linter, filenames) for linter in linters], [])
-    return lint_runner
-
-
-def dryrun(linters, filenames):
-
-    def dryrunonefile(filename, linter):
+        cmd = linter['command'] + ' "' + filename + '"'
+        (out, err, returncode) = get_shell_response(cmd)
+        failed = ((out and (linter.get('condition', 'error') == 'output')) or err or (not (returncode == 0)))
         trimmed_filename = filename.replace(git_base + '/', '', 1)
-        return (trimmed_filename, linter.name, 0, ['    {}'.format(trimmed_filename)])
-
-    def dryrunonce(linter, filenames):
-        match_filter = make_match_filter([linter])
-        files_to_check = [filename for filename in filenames if match_filter(filename)]
-        return [dryrunonefile(filename, linter) for filename in files_to_check]
-
-    return reduce(operator.add, [dryrunonce(linter, filenames) for linter in linters], [])
+        if not failed:
+            return (trimmed_filename, linter_name, 0, [])
+        
+        prefix = (((linter.get('print', 'false').strip().lower() != 'true') and '  ')
+                  or '   {}: '.format(trimmed_filename))
+        output = (encode_shell_messages(prefix, out) +
+                  ((err and encode_shell_messages(prefix, err)) or []))
+        return (trimmed_filename, linter_name, (returncode or 1), output)
     
 
-#  __  __      _
-# |  \/  |__ _(_)_ _
-# | |\/| / _` | | ' \
-# |_|  |_\__,_|_|_||_|
-#
-
-def print_report(results, cmdline, unlintable_filenames, cant_lint_filenames,
-                 broken_linter_names, unfindable_filenames):
-    sort_position = 1
-    grouping = 'Linter: {}'
-    if 'byfile' in cmdline:
-        sort_position = 0
-        grouping = 'Filename: {}'
-    grouped_results = group_by(results, sort_position)
-    for group in grouped_results:
-        print(grouping.format(group[0]))
-        for (filename, lintername, returncode, text) in group[1]:
-            print("\n".join(text))
-        print("")
-    if len(broken_linter_names):
-        print("These linters could not be run:", ",".join(broken_linter_names))
-        if len(cant_lint_filenames):
-            print("As a result, these files were not linted:")
-            print("\n".join(["    {}".format(f) for f in cant_lint_filenames]))
-    if len(unlintable_filenames):
-        print("The following files had no recognizeable linters:")
-        print("\n".join(["    {}".format(f) for f in unlintable_filenames]))
-    if len(unfindable_filenames):
-        print("The following files could not be found:")
-        print("\n".join(["    {}".format(f) for f in unfindable_filenames]))
+    @staticmethod
+    def run_one_linter(linter, filenames):
+        """ Runs one linter against a set of files
+        
+        Creates a match filter for the linter, extract the files to be
+        linted, and runs the linter against each file, returning the
+        result as a list of successes and failures.  Failures have a
+        return code and the output of the lint process.
+        """
+        match_filter = make_match_filter([linter])
+        files = set([filename for filename in filenames if match_filter(filename)])
+        return [self.run_external_linter(filename, linter.linter, linter.name) for filename in files]
 
 
+    def __call__(self, linters, filenames):
+        """ Returns a function to run a set of linters against a set of filenames
+
+        This returns a function because it's going to be wrapped in a
+        runner to better handle stashing and restoring a staged commit.
+        """
+        return reduce(operator.add,
+                      [run_one_linter(linter, self.filenames) for linter in self.linters], [])
 
 
-def print_help(options_list, name):
-    print(_('Usage: {} [options] [filenames]').format(name))
-    for item in options_list:
-        print(' -{:<1}  --{:<12}  {}'.format(item[0], item[1], item[3]))
-    return sys.exit()
+    def dryrun(self):
+
+        def dryrunonefile(filename, linter):
+            trimmed_filename = filename.replace(git_base + '/', '', 1)
+            return (trimmed_filename, linter.name, 0, ['    {}'.format(trimmed_filename)])
+
+        def dryrunonce(linter, filenames):
+            match_filter = MatchFilter([linter])
+            files_to_check = [filename for filename in filenames if match_filter(filename)]
+            return [dryrunonefile(filename, linter) for filename in files_to_check]
+        
+        return reduce(operator.add, [dryrunonce(linter, self.filenames) for linter in self.linters], [])
+    
 
 
-def print_version(name, version):
-    print('{} {} Copyright (c) 2009, 2016 Kennth M. "Elf" Sternberg'.format(name, version))
-
-
-
-def run_gitlint(cmdline, config, extras):
+def run_linters(options, config, extras):
 
     def build_config_subset(keys):
         """ Returns a subset of the configuration, with only those linters mentioned in keys """
         return [item for item in config if item.name in keys]
 
     """ Runs the requested linters """
-    all_filenames, unfindable_filenames = get_filelist(cmdline, extras)
+    all_filenames, unfindable_filenames = get_filelist(options, extras)
 
-    stash_runner = pick_stash_runner(cmdline)
-
-    is_lintable = make_match_filter(config)
+    is_lintable = MatchFilter(config)
 
     lintable_filenames = set([filename for filename in all_filenames
                               if is_lintable(filename)])
@@ -520,26 +467,23 @@ def run_gitlint(cmdline, config, extras):
 
     working_linter_names, broken_linter_names = get_linter_status(config)
 
-    cant_lint_filter = make_match_filter(build_config_subset(
+    cant_lint_filter = MatchFilter(build_config_subset(
         broken_linter_names))
 
     cant_lint_filenames = [filename for filename in lintable_filenames
                            if cant_lint_filter(filename)]
 
-    if 'dryrun' in cmdline:
-        return print_report(
-            dryrun(
-                build_config_subset(working_linter_names), sorted(lintable_filenames)),
-            cmdline, unlintable_filenames, cant_lint_filenames,
+    if 'dryrun' in options:
+        dryrun_results = dryrun(
+            build_config_subset(working_linter_names), sorted(lintable_filenames))
+        return (dryrun_results, unlintable_filenames, cant_lint_filenames,
+                broken_linter_names, unfindable_filenames)
+
+    runner = Runner(options)
+    linter = Linter(build_config_subset(working_linter_names),
+                    sorted(lintable_filenames))
+    results = runner(linter, lintable_filenames)
+
+    return (results, unlintable_filenames, cant_lint_filenames,
             broken_linter_names, unfindable_filenames)
 
-    lint_runner = build_lint_runner(
-        build_config_subset(working_linter_names), sorted(lintable_filenames))
-
-    results = stash_runner(lint_runner, lintable_filenames)
-
-    print_report(results, cmdline, unlintable_filenames, cant_lint_filenames,
-                 broken_linter_names, unfindable_filenames)
-    if not len(results):
-        return 0
-    return max([i[2] for i in results if len(i)])

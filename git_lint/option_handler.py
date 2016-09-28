@@ -6,8 +6,17 @@
 
 # This was a lot shorter and smarter in Hy...
 
+# A lot of what you see here is separated from git_lint itself, since this will not be
+# relevant to the operation of pre-commit.
 
-def make_rational_options(options, commandline):
+#   ___                              _   _    _
+#  / __|___ _ __  _ __  __ _ _ _  __| | | |  (_)_ _  ___
+# | (__/ _ \ '  \| '  \/ _` | ' \/ _` | | |__| | ' \/ -_)
+#  \___\___/_|_|_|_|_|_\__,_|_||_\__,_| |____|_|_||_\___|
+#
+
+
+def cleanup_options(options, commandline):
     """Takes a table of options and the commandline, and returns a
        dictionary of those options that appear on the commandline
        along with any extra arguments.
@@ -19,7 +28,7 @@ def make_rational_options(options, commandline):
         The arguments as received by the start-up process
     """
 
-    def make_options_rationalizer(options):
+    def make_option_streamliner(options):
 
         """Takes a list of option tuples, and returns a function that takes
             the output of getopt and reduces it to the longopt key and
@@ -28,17 +37,16 @@ def make_rational_options(options, commandline):
 
         fullset = {}
         for option in options:
-            if not option[1]:
-                continue
-            if option[0]:
-                fullset['-' + option[0]] = option[1]
-            fullset['--' + option[1]] = option[1]
+            if option[1]:
+                fullset['--' + option[1]] = option[1]
+                if option[0]:
+                    fullset['-' + option[0]] = option[1]
 
-        def rationalizer(acc, it):
+        def streamliner(acc, it):
             acc[fullset[it[0]]] = it[1]
             return acc
 
-        return rationalizer
+        return streamliner
 
     def remove_conflicted_options(options, request):
         """Takes our list of option tuples, and a cleaned copy of what was
@@ -68,10 +76,10 @@ def make_rational_options(options, commandline):
                                          optstringslong)
 
     # Turns what getopt returns into something more human-readable
-    rationalize_options = make_options_rationalizer(options)
+    streamline_options = make_option_streamliner(options)
 
     # Remove any options that are superseded by others.
-    (retoptions, excluded) = remove_conflicted_options(
-        optlist, reduce(rationalize_options, options, {}))
+    (ret, excluded) = remove_conflicted_options(
+        optlist, reduce(streamline_options, options, {}))
 
-    return (retoptions, filenames, excluded)
+    return (ret, filenames, excluded)
