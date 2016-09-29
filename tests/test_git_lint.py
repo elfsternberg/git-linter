@@ -18,6 +18,8 @@ import pprint
 import tempfile
 from git_lint import git_lint
 
+# Set up the environment to closely match the one cgit uses for its own unit testing.
+
 environment = copy.copy(os.environ)
 environment.update({
     'LANG': 'C',
@@ -33,7 +35,7 @@ environment.update({
     'GIT_MERGE_AUTOEDIT': 'no'
 })
 
-for key in ['XDF_CONFIG_HOME', 'GITPERLLIB', 'CDPATH', 
+for key in ['XDF_CONFIG_HOME', 'GITPERLLIB', 'CDPATH',
             'GREP_OPTIONS', 'UNZIP']:
     environment.pop(key, None)
 
@@ -48,20 +50,24 @@ print = False
 condition = error
 """
 
+
 # Basic TOX settings aren't good enough: we need to have something more or less guaranteed
 # to not have a '.git' directory somewhere lurking in a parent folder.
 
 def shell(cmd, environment=environment):
     return subprocess.check_call(cmd, shell=True, env=environment)
 
+
 def outshell(cmd, environment=environment):
     return subprocess.check_output(cmd, shell=True, env=environment)
 
-def fullshell(cmd, environment=environment):    
+
+def fullshell(cmd, environment=environment):
     process = subprocess.Popen(cmd, shell=True, env=environment,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (stdout, stderr) = process.communicate()
     return (stdout, stderr, process.returncode)
+
 
 class gittemp:
     def __enter__(self):
@@ -81,11 +87,15 @@ def test_01_not_a_repository():
         assert stderr.startswith('A git repository was not found')
 
 
+# The important aspect here is that it SHOULD NOT CRASH even though
+# there is no HEAD repository and no configuration file.  It should
+# report the lack of a configuration file without blinking.
+
 def test_02_empty_repository():
     with gittemp() as path:
         os.chdir(path)
         shell('git init')
-        (stdout, stderr, rc) = fullshell('git lint -l')
+        (stdout, stderr, rc) = fullshell('git lint')
         assert stderr.startswith('No configuration file found,')
 
 
@@ -97,6 +107,7 @@ def test_03_simple_repository():
         shell('git init && git add . && git commit -m "Test"')
         ret = outshell('git lint -v')
         assert ret.index('Copyright') > 0
+
 
 def test_04_linters_present():
     with gittemp() as path:
