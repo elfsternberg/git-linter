@@ -4,6 +4,7 @@ import getopt
 import gettext
 import operator
 import os
+import shutil
 import re
 import subprocess
 import sys
@@ -43,7 +44,7 @@ def find_config_file(options, base):
             sys.exit(_('Configuration file not found: {}\n').format(config))
         return configpath
 
-    home = os.path.join(os.environ.get('HOME'))
+    home = os.environ.get('HOME')
     possibles = (os.path.join(base, '.git-lint'),
                  os.path.join(base, '.git-lint/config'),
                  os.path.join(home, '.git-lint'),
@@ -51,7 +52,7 @@ def find_config_file(options, base):
 
     matches = [p for p in possibles if os.path.isfile(p)]
     if len(matches) == 0:
-        sys.exit(_('No configuration file found'))
+        sys.exit(_('No configuration file found, tried: {}').format(':'.join(possibles)))
 
     return matches[0]
 
@@ -187,11 +188,7 @@ def executable_exists(script, label):
     if scriptname.startswith('/'):
         return (is_executable(scriptname) and scriptname) or None
 
-    possibles = [path for path in
-                 [os.path.join(path, scriptname)
-                  for path in os.environ.get('PATH').split(':')]
-                 if is_executable(path)]
-    return (len(possibles) and possibles.pop(0)) or False
+    return shutil.which(scriptname)
 
 
 def get_working_linter_names(config):

@@ -1,18 +1,17 @@
 #!/usr/bin/env python
-import git_lint
+from git_lint import load_config, run_linters, git_base
 
 def main(*args):
-    if git_lint.git_base is None:
+    if git_base is None:
         sys.exit(_('A git repository was not found.'))
 
     pre_commit_config = {
         'staging': True,
-        'base': True,
-        'all': True
+        'base': True
     }
 
-    config = git_lint.get_config(pre_commit_config, git_lint.git_base)
-    return git_lint.run_gitlint(pre_commit_config, config, [])
+    config = load_config(pre_commit_config, git_base)
+    return run_linters(pre_commit_config, config, [])
 
 
 if __name__ == '__main__':
