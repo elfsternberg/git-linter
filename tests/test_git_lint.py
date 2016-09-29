@@ -55,16 +55,19 @@ condition = error
 # to not have a '.git' directory somewhere lurking in a parent folder.
 
 def shell(cmd, environment=environment):
-    return subprocess.check_call(cmd, shell=True, env=environment)
+    return subprocess.check_call(cmd, shell=True, env=environment,
+                                 universal_newlines=True)
 
 
 def outshell(cmd, environment=environment):
-    return subprocess.check_output(cmd, shell=True, env=environment)
+    return subprocess.check_output(cmd, shell=True, env=environment,
+                                   universal_newlines=True)
 
 
 def fullshell(cmd, environment=environment):
     process = subprocess.Popen(cmd, shell=True, env=environment,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               universal_newlines=True)
     (stdout, stderr) = process.communicate()
     return (stdout, stderr, process.returncode)
 

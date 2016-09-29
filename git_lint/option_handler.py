@@ -1,6 +1,7 @@
 # Copyright (C) 2015 Elf M. Sternberg
 # Author: Elf M. Sternberg
 
+from functools import reduce
 import getopt
 
 # This was a lot shorter and smarter in Hy...
