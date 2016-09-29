@@ -51,6 +51,18 @@ condition = error
 # Basic TOX settings aren't good enough: we need to have something more or less guaranteed
 # to not have a '.git' directory somewhere lurking in a parent folder.
 
+def shell(cmd, environment=environment):
+    return subprocess.check_call(cmd, shell=True, env=environment)
+
+def outshell(cmd, environment=environment):
+    return subprocess.check_output(cmd, shell=True, env=environment)
+
+def fullshell(cmd, environment=environment):    
+    process = subprocess.Popen(cmd, shell=True, env=environment,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (stdout, stderr) = process.communicate()
+    return (stdout, stderr, process.returncode)
+
 class gittemp:
     def __enter__(self):
         self.cwd = os.getcwd()
@@ -65,19 +77,15 @@ class gittemp:
 def test_01_not_a_repository():
     with gittemp() as path:
         os.chdir(path)
-        p = subprocess.Popen('git lint', shell=True, env=environment,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (stdout, stderr) = p.communicate()
+        (stdout, stderr, rc) = fullshell('git lint')
         assert stderr.startswith('A git repository was not found')
 
 
 def test_02_empty_repository():
     with gittemp() as path:
         os.chdir(path)
-        subprocess.check_call('git init', shell=True, env=environment)
-        p = subprocess.Popen('git lint -l', shell=True, env=environment,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (stdout, stderr) = p.communicate()
+        shell('git init')
+        (stdout, stderr, rc) = fullshell('git lint -l')
         assert stderr.startswith('No configuration file found,')
 
 
@@ -86,10 +94,8 @@ def test_03_simple_repository():
         os.chdir(path)
         with open(".git-lint", "w") as f:
             f.write(git_lint_src)
-        subprocess.check_call('git init', shell=True, env=environment)
-        subprocess.check_call('git add .', shell=True, env=environment)
-        subprocess.check_call('git commit -m "Test."', shell=True, env=environment)
-        ret = subprocess.check_output('git lint -v', shell=True, env=environment)
+        shell('git init && git add . && git commit -m "Test"')
+        ret = outshell('git lint -v')
         assert ret.index('Copyright') > 0
 
 def test_04_linters_present():
@@ -97,10 +103,8 @@ def test_04_linters_present():
         os.chdir(path)
         with open(".git-lint", "w") as f:
             f.write(git_lint_src)
-        subprocess.check_call('git init', shell=True, env=environment)
-        subprocess.check_call('git add .', shell=True, env=environment)
-        subprocess.check_call('git commit -m "Test."', shell=True, env=environment)
-        ret = subprocess.check_output('git lint -l', shell=True, env=environment)
+        shell('git init && git add . && git commit -m "Test"')
+        ret = outshell('git lint -l')
         assert len(ret.split("\n")) == 3
         assert ret.index('pep8') > 0
 
