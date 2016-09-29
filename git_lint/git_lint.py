@@ -44,11 +44,11 @@ def find_config_file(options, base):
             sys.exit(_('Configuration file not found: {}\n').format(config))
         return configpath
 
-    home = os.environ.get('HOME')
-    possibles = (os.path.join(base, '.git-lint'),
-                 os.path.join(base, '.git-lint/config'),
-                 os.path.join(home, '.git-lint'),
-                 os.path.join(home, '.git-lint/config'))
+    home = os.environ.get('HOME', None)
+    possibles = [os.path.join(base, '.git-lint'),
+                 os.path.join(base, '.git-lint/config')] + ((home and [
+                     os.path.join(home, '.git-lint'),
+                     os.path.join(home, '.git-lint/config')]) or [])
 
     matches = [p for p in possibles if os.path.isfile(p)]
     if len(matches) == 0:
@@ -157,14 +157,14 @@ class MatchFilter:
 
     def __call__(self, path):
         return self.matcher.search(path)
-        
+
     @staticmethod
     def make_match_filter_matcher(extensions):
         trimmed = [s.strip() for s in reduce(operator.add,
                                              [ex.split(',') for ex in extensions], [])]
         cleaned = [re.sub(r'^\.', '', s) for s in trimmed]
         return re.compile(r'\.' + '|'.join(cleaned) + r'$')
-    
+
 
 #   ___ _           _     _ _     _
 #  / __| |_  ___ __| |__ | (_)_ _| |_ ___ _ _ ___
@@ -188,7 +188,12 @@ def executable_exists(script, label):
     if scriptname.startswith('/'):
         return (is_executable(scriptname) and scriptname) or None
 
-    return shutil.which(scriptname)
+    possibles = [path for path in
+                 [os.path.join(path, scriptname)
+                  for path in os.environ.get('PATH').split(':')]
+                 if is_executable(path)]
+
+    return (len(possibles) and possibles.pop(0)) or False
 
 
 def get_working_linter_names(config):
@@ -220,8 +225,8 @@ def get_filelist(options, extras):
         if os.path.samefile(os.getcwd(), git_base):
             return base_file_filter(filenames)
         gitcwd = os.path.join(os.path.relpath(os.getcwd(), git_base), '')
-        return base_file_filter([file for file in files
-                                 if file.startswith(gitcwd)])
+        return base_file_filter([filename for filename in filenames
+                                 if filename.startswith(gitcwd)])
 
     def check_for_conflicts(filesets):
         """ Scan list of porcelain files for merge conflic state. """
@@ -372,17 +377,17 @@ class Linters:
         trimmed_filename = filename.replace(git_base + '/', '', 1)
         if not failed:
             return (trimmed_filename, linter_name, 0, [])
-        
+
         prefix = (((linter.get('print', 'false').strip().lower() != 'true') and '  ') or
                   '   {}: '.format(trimmed_filename))
         output = (Linters.encode_shell_messages(prefix, out) +
                   ((err and Linters.encode_shell_messages(prefix, err)) or []))
         return (trimmed_filename, linter_name, (returncode or 1), output)
-    
+
     @staticmethod
     def run_one_linter(linter, filenames):
         """ Runs one linter against a set of files
-        
+
         Creates a match filter for the linter, extract the files to be
         linted, and runs the linter against each file, returning the
         result as a list of successes and failures.  Failures have a
@@ -411,7 +416,7 @@ class Linters:
             match_filter = MatchFilter([linter])
             files_to_check = [filename for filename in filenames if match_filter(filename)]
             return [dryrunonefile(filename, linter) for filename in files_to_check]
-        
+
         return reduce(operator.add, [dryrunonce(linter, self.filenames) for linter in self.linters], [])
 
 

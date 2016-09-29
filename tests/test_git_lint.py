@@ -15,6 +15,7 @@ import os
 import shutil
 import subprocess
 import pprint
+import tempfile
 from git_lint import git_lint
 
 environment = copy.copy(os.environ)
@@ -37,24 +38,70 @@ for key in ['XDF_CONFIG_HOME', 'GITPERLLIB', 'CDPATH',
     environment.pop(key, None)
 
     
-class TestGit_lint(object):
+git_lint_src = """
+[pep8]
+comment = PEP8 with some white space and line length checking turned off
+output = Running pep8...
+command = pep8 -r --ignore=E501,W293,W391
+match = .py
+print = False
+condition = error
+"""
 
-    @classmethod
-    def setup_class(cls):
-        if os.path.exists('t'):
-            shutil.rmtree('t')
-        os.mkdir('t')
-        shutil.copy('.git-lint', 't')
-        os.chdir('t')
-        subprocess.check_output('git init', shell=True, env=environment)
+# Basic TOX settings aren't good enough: we need to have something more or less guaranteed
+# to not have a '.git' directory somewhere lurking in a parent folder.
+
+class gittemp:
+    def __enter__(self):
+        self.cwd = os.getcwd()
+        self.path = tempfile.mkdtemp()
+        return self.path
+
+    def __exit__(self, *args):
+        os.chdir(self.cwd)
+        shutil.rmtree(self.path)
 
 
-    def test_itruns(self):
+def test_01_not_a_repository():
+    with gittemp() as path:
+        os.chdir(path)
+        p = subprocess.Popen('git lint', shell=True, env=environment,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (stdout, stderr) = p.communicate()
+        assert stderr.startswith('A git repository was not found')
+
+
+def test_02_empty_repository():
+    with gittemp() as path:
+        os.chdir(path)
+        subprocess.check_call('git init', shell=True, env=environment)
+        p = subprocess.Popen('git lint -l', shell=True, env=environment,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (stdout, stderr) = p.communicate()
+        assert stderr.startswith('No configuration file found,')
+
+
+def test_03_simple_repository():
+    with gittemp() as path:
+        os.chdir(path)
+        with open(".git-lint", "w") as f:
+            f.write(git_lint_src)
+        subprocess.check_call('git init', shell=True, env=environment)
+        subprocess.check_call('git add .', shell=True, env=environment)
+        subprocess.check_call('git commit -m "Test."', shell=True, env=environment)
         ret = subprocess.check_output('git lint -v', shell=True, env=environment)
-        assert ret.startswith('git-lint')
+        assert ret.index('Copyright') > 0
 
-    @classmethod
-    def teardown_class(cls):
-        os.chdir('..')
-        shutil.rmtree('t')
+def test_04_linters_present():
+    with gittemp() as path:
+        os.chdir(path)
+        with open(".git-lint", "w") as f:
+            f.write(git_lint_src)
+        subprocess.check_call('git init', shell=True, env=environment)
+        subprocess.check_call('git add .', shell=True, env=environment)
+        subprocess.check_call('git commit -m "Test."', shell=True, env=environment)
+        ret = subprocess.check_output('git lint -l', shell=True, env=environment)
+        assert len(ret.split("\n")) == 3
+        assert ret.index('pep8') > 0
 
+        
