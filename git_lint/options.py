@@ -17,7 +17,7 @@ OPTIONS = [
     ('w', 'workspace', False,
      _('Scan the workspace'), ['staging']),
     ('s', 'staging', False,
-     _('Scan the staging area (useful for pre-commit).'), []),
+     _('Scan the staging area (useful for pre-commit).'), ['monitor']),
     ('g', 'changes', False,
      _("Report lint failures only for diff'd sections"), ['complete']),
     ('p', 'complete', False,
@@ -28,6 +28,8 @@ OPTIONS = [
      _('Group the reports by file first'), []),
     ('d', 'dryrun', False,
      _('Dry run - report what would be done, but do not run linters'), []),
+    ('m', 'monitor', False,
+     _('Run continuously, monitoring filesytem for changes'), []),
     ('c', 'config', True,
      _('Path to config file'), []),
     ('h', 'help', False,
@@ -35,3 +37,4 @@ OPTIONS = [
     ('v', 'version', False,
      _('Version information'), [])
 ]
+ 
