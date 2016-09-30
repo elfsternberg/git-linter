@@ -188,6 +188,7 @@ def executable_exists(script, label):
     if scriptname.startswith('/'):
         return (is_executable(scriptname) and scriptname) or None
 
+    # shutil.which() doesn't appear until Python 3, darnit.
     possibles = [path for path in
                  [os.path.join(path, scriptname)
                   for path in os.environ.get('PATH').split(':')]
@@ -253,6 +254,9 @@ def get_filelist(options, extras):
         stream = [entry for entry in get_git_response(cmd).split(u'\x00')
                   if len(entry) > 0]
 
+        # Yeah, baby, recursion, the way this is meant to be handled.
+        # If you have more than 999 files that need linting, you have
+        # a bigger problem...
         def parse_stream(acc, stream):
             """Parse the list of files.  T
 
@@ -420,7 +424,7 @@ class Linters:
         return reduce(operator.add, [dryrunonce(linter, self.filenames) for linter in self.linters], [])
 
 
-def run_linters(options, config, extras):
+def run_linters(options, config, extras=[]):
 
     def build_config_subset(keys):
         """ Returns a subset of the configuration, with only those linters mentioned in keys """

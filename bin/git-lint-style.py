@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+from __future__ import print_function
+from functools import reduce
+import subprocess
+import os.path
+import getopt
+import sys
+import re
+import os
+
+import gettext
+_ = gettext.gettext
+
+
+def fullshell(cmd):
+    process = subprocess.Popen(cmd,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               universal_newlines=True)
+    (stdout, stderr) = process.communicate()
+    return (stdout, stderr, process.returncode)
+
+
+def path_which(scriptname):
+    def is_executable(path):
+        return os.path.exists(path) and os.access(path, os.X_OK)
+
+    possibles = [path for path in
+                 [os.path.join(path, scriptname)
+                  for path in os.environ.get('PATH').split(':')]
+                 if is_executable(path)]
+    
+    return (len(possibles) and possibles.pop(0)) or False
+
+
+def main(*args):
+    (opts, filenames) = getopt.getopt(args[1:], '', ['min=', 'max='])
+    options = {re.sub('^\-+', '', i[0]): i[1] for i in opts}
+    style = path_which('style')
+    if not style:
+        sys.exit(_('Could not find the style program'))
+    if len(filenames) == 0:
+        sys.exit(_('No files specifed to scan'))
+    (values, error, returncode) = fullshell([style, filenames[0]])
+    if returncode != 0:
+        print(error)
+        return returncode
+    kincaid = re.search(r'Kincaid:\s*([\d\.]+)', values, re.MULTILINE)
+    val = float(kincaid.group(1))
+
+    msg = ""
+    if options.get('min', None):
+        if val < int(options.get('min')):
+            msg = _('Readability too low')
+    if options.get('max', None):
+        if val > int(options.get('max')):
+            msg = _('Readability too high')
+    print(_("{}: {}  {}").format(filenames[0], val, msg))
+    return (msg != "" and 1) or 0
+
+
+if __name__ == '__main__':
+    import sys
+    sys.exit(main(*sys.argv))
+
+    
+
+
