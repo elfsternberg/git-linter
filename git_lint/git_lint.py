@@ -146,10 +146,6 @@ git_head = get_git_head()
 #  \___/ \__|_|_|_|\__|_\___/__/
 #
 
-def base_file_cleaner(files):
-    return [file.replace(git_base + '/', '', 1) for file in files]
-
-
 class MatchFilter:
 
     def __init__(self, config):

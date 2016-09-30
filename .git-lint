@@ -63,3 +63,9 @@ match = .json
 print = False
 condition = error
 
+[readability]
+output = Running Text Style Check
+match = .rst
+command = git-lint-style
+print = False
+condition = error

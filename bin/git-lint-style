@@ -46,6 +46,10 @@ def main(*args):
         print(error)
         return returncode
     kincaid = re.search(r'Kincaid:\s*([\d\.]+)', values, re.MULTILINE)
+
+    # Assumes an uncheckable issue, like an empty RST.  Not unusual.
+    if not kincaid: 
+        return 0
     val = float(kincaid.group(1))
 
     msg = ""

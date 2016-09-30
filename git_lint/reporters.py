@@ -1,6 +1,11 @@
 from __future__ import print_function
+from .git_lint import load_config, run_linters, git_base
 import gettext
 _ = gettext.gettext
+
+
+def base_file_cleaner(files):
+    return [file.replace(git_base + '/', '', 1) for file in files]
 
 
 # ICK.  Mutation, references, and hidden assignment.
@@ -28,7 +33,7 @@ def print_report(results, unlintable_filenames, cant_lint_filenames,
     for group in grouped_results:
         print(grouping.format(group[0]))
         for (filename, lintername, returncode, text) in group[1]:
-            print('\n'.join(text))
+            print('\n'.join(base_file_cleaner(text)))
         print('')
     if len(broken_linter_names):
         print(_('These linters could not be run:'), ','.join(broken_linter_names))

@@ -65,15 +65,17 @@ def cleanup_options(options, commandline):
                    if key not in excluded}
         return (cleaned, excluded)
 
-    def shortoptstogo(i): return i[0] + ((i[2] and ':') or '')
+    def shortoptstogo(i):
+        return i[0] + ((i[2] and ':') or '')
 
-    def longoptstogo(i): return i[1] + ((i[2] and '=') or '')
+    def longoptstogo(i):
+        return i[1] + ((i[2] and '=') or '')
 
     optstringsshort = ''.join([shortoptstogo(opt) for opt in options])
     optstringslong = [longoptstogo(opt) for opt in options]
     (chosen_options, filenames) = getopt.getopt(commandline[1:],
-                                         optstringsshort,
-                                         optstringslong)
+                                                optstringsshort,
+                                                optstringslong)
 
     # Turns what getopt returns into something more human-readable
     streamline_options = make_option_streamliner(options)

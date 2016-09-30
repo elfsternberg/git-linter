@@ -4,10 +4,11 @@ import sys
 import argparse
 import os.path
 
+
 def _resolve_prefix(prefix, type):
     osx_system_prefix = r'^/System/Library/Frameworks/Python.framework/Versions'
-    matches = {'man': [(r'^/usr$', '/usr/share'), 
-                       (r'^/usr/local$', '/usr/local/share'), 
+    matches = {'man': [(r'^/usr$', '/usr/share'),
+                       (r'^/usr/local$', '/usr/local/share'),
                        (osx_system_prefix, '/usr/share')]}
 
     match = [i[1] for i in matches.get(type, []) if re.match(i[0], prefix)]
@@ -19,7 +20,7 @@ def _resolve_prefix(prefix, type):
 def get_data_files(prefix):
     return [(os.path.join(_resolve_prefix(prefix, 'man'), 'man/man1'), ['docs/_build/man/git-lint.1'])]
 
-    
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--prefix', default='',
                     help='prefix to install data files')
@@ -62,10 +63,11 @@ setup(
     package_dir={'git_lint':
                  'git_lint'},
     include_package_data=True,
-    data_files = get_data_files(prefix),
+    data_files=get_data_files(prefix),
     install_requires=requirements,
     license="MIT",
     zip_safe=False,
+    scripts=['bin/git-lint-style'],
     keywords='git lint style syntaxt development',
     entry_points={
         'console_scripts': [
