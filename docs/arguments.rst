@@ -14,7 +14,7 @@
     Scan the workspace [default]
 **-s, --staging**
     Scan the staging area (useful for pre-commit).
-**-c** <path>, --config**=<path>  Path to config file
+**-c <path>, --config**=<path>  Path to config file
 **-d, --dryrun**
     Report what git-lint would do, but don't actually do anything.
 **-q, --quiet**

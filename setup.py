@@ -1,6 +1,30 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+import re
+import sys
+import argparse
+import os.path
 
+def _resolve_prefix(prefix, type):
+    osx_system_prefix = r'^/System/Library/Frameworks/Python.framework/Versions'
+    matches = {'man': [(r'^/usr$', '/usr/share'), 
+                       (r'^/usr/local$', '/usr/local/share'), 
+                       (osx_system_prefix, '/usr/share')]}
+
+    match = [i[1] for i in matches.get(type, []) if re.match(i[0], prefix)]
+    if not len(match):
+        raise ValueError("not supported type: {}".format(type))
+    return match.pop()
+
+
+def get_data_files(prefix):
+    return [(os.path.join(_resolve_prefix(prefix, 'man'), 'man/man1'), ['docs/_build/man/git-lint.1'])]
+
+    
+parser = argparse.ArgumentParser()
+parser.add_argument('--prefix', default='',
+                    help='prefix to install data files')
+opts, _ = parser.parse_known_args(sys.argv)
+prefix = opts.prefix or '/usr'
 
 try:
     from setuptools import setup
@@ -22,6 +46,8 @@ test_requirements = [
     # TODO: put package test requirements here
 ]
 
+print get_data_files(prefix)
+
 setup(
     name='git_linter',
     version='0.0.4',
@@ -36,6 +62,7 @@ setup(
     package_dir={'git_lint':
                  'git_lint'},
     include_package_data=True,
+    data_files = get_data_files(prefix),
     install_requires=requirements,
     license="MIT",
     zip_safe=False,
