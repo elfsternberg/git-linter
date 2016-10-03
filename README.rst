@@ -67,11 +67,11 @@ Features
 Acknowledgements
 ----------------
 `Git lint` started life as a simple pre-commit hook.  Most of the
-changes since were inspired by Steve Pulec's *Why You Need a Git
-Pre-Commit Hook and Why Most Are Wrong_,* as well as just my own needs as
+changes since were inspired by Steve Pulec's *`Why You Need a Git
+Pre-Commit Hook and Why Most Are Wrong`_ ,* as well as just my own needs as
 a software developer.
 
-.. _Wrong: https://dzone.com/articles/why-your-need-git-pre-commit
+.. _Why You Need a Git Pre-Commit Hook and Why Most Are Wrong: https://dzone.com/articles/why-your-need-git-pre-commit
 
 
 Disclaimer
