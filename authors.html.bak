@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>History &#8212; Git Lint 0.0.4 documentation</title>
+    <title>Credits &#8212; Git Lint 0.0.4 documentation</title>
     
-    <link rel="stylesheet" href="static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -20,11 +20,12 @@
         HAS_SOURCE:  true
       };
     </script>
-    <script type="text/javascript" src="static/jquery.js"></script>
-    <script type="text/javascript" src="static/underscore.js"></script>
-    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Git Lint 0.0.4 documentation" href="index.html" />
-    <link rel="prev" title="Credits" href="authors.html" /> 
+    <link rel="next" title="History" href="history.html" />
+    <link rel="prev" title="Contributing" href="contributing.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,7 +38,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="authors.html" title="Credits"
+          <a href="history.html" title="History"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
@@ -48,15 +52,17 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="history">
-<h1>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id1">
-<h2>0.0.2 (2015-05-22)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>Pre-commit version</p>
+  <div class="section" id="credits">
+<h1>Credits<a class="headerlink" href="#credits" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="development-lead">
+<h2>Development Lead<a class="headerlink" href="#development-lead" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Kenneth M. &#8220;Elf&#8221; Sternberg &lt;<a class="reference external" href="mailto:elf&#46;sternberg&#37;&#52;&#48;gmail&#46;com">elf<span>&#46;</span>sternberg<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</li>
+</ul>
 </div>
-<div class="section" id="id2">
-<h2>0.0.04 (2016-09-26)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p>Moved to &#8220;git lint&#8221; and optioned the hell out of it.</p>
+<div class="section" id="contributors">
+<h2>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h2>
+<p>None yet. Why not be the first?</p>
 </div>
 </div>
 
@@ -68,20 +74,23 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">History</a><ul>
-<li><a class="reference internal" href="#id1">0.0.2 (2015-05-22)</a></li>
-<li><a class="reference internal" href="#id2">0.0.04 (2016-09-26)</a></li>
+<li><a class="reference internal" href="#">Credits</a><ul>
+<li><a class="reference internal" href="#development-lead">Development Lead</a></li>
+<li><a class="reference internal" href="#contributors">Contributors</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="authors.html"
-                        title="previous chapter">Credits</a></p>
+  <p class="topless"><a href="contributing.html"
+                        title="previous chapter">Contributing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="history.html"
+                        title="next chapter">History</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/history.txt"
+      <li><a href="_sources/authors.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -109,7 +118,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="authors.html" title="Credits"
+          <a href="history.html" title="History"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>

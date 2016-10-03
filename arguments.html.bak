@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>History &#8212; Git Lint 0.0.4 documentation</title>
+    <title>&lt;no title&gt; &#8212; Git Lint 0.0.4 documentation</title>
     
-    <link rel="stylesheet" href="static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -20,11 +20,10 @@
         HAS_SOURCE:  true
       };
     </script>
-    <script type="text/javascript" src="static/jquery.js"></script>
-    <script type="text/javascript" src="static/underscore.js"></script>
-    <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="Git Lint 0.0.4 documentation" href="index.html" />
-    <link rel="prev" title="Credits" href="authors.html" /> 
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Git Lint 0.0.4 documentation" href="index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -36,9 +35,6 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="authors.html" title="Credits"
-             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>  
@@ -48,17 +44,40 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="history">
-<h1>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id1">
-<h2>0.0.2 (2015-05-22)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>Pre-commit version</p>
-</div>
-<div class="section" id="id2">
-<h2>0.0.04 (2016-09-26)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p>Moved to &#8220;git lint&#8221; and optioned the hell out of it.</p>
-</div>
-</div>
+  <dl class="docutils">
+<dt><strong>-o &lt;linters&gt;,  &#8211;only=&lt;linters&gt;</strong></dt>
+<dd>A comma-separated list of only those linters to run.</dd>
+<dt><strong>-x &lt;linters&gt; &#8211;exclude=&lt;linters&gt;</strong></dt>
+<dd>A comma-separated list of linters to skip.</dd>
+<dt><strong>-l, &#8211;linters</strong></dt>
+<dd>Show the list of configured linters.</dd>
+<dt><strong>-b, &#8211;base</strong></dt>
+<dd>Check all changed files from GIT_DIR, not just those in the current directory and down.</dd>
+<dt><strong>-a, &#8211;all</strong></dt>
+<dd>Scan all files, not just those that have changed.</dd>
+<dt><strong>-e, &#8211;every</strong></dt>
+<dd>Scan all files, not just those that have changed, from GIT_DIR.  Short for -b -a</dd>
+<dt><strong>-w, &#8211;workspace</strong></dt>
+<dd>Scan the workspace [default]</dd>
+<dt><strong>-s, &#8211;staging</strong></dt>
+<dd>Scan the staging area (useful for pre-commit).</dd>
+<dt><strong>-c &lt;path&gt;, &#8211;config=&lt;path&gt;</strong></dt>
+<dd>Path to config file</dd>
+<dt><strong>-t, &#8211;bylinter</strong></dt>
+<dd>Group reports by linter first as they appear in the config file [default]</dd>
+<dt><strong>-f, &#8211;byfile</strong></dt>
+<dd>Group reports by file first, linter second</dd>
+<dt><strong>-d, &#8211;dryrun</strong></dt>
+<dd>Report what git-lint would do, but don&#8217;t actually do anything.</dd>
+<dt><strong>-q, &#8211;quiet</strong></dt>
+<dd>Produce a short report of file that failed to pass.</dd>
+<dt><strong>-h, &#8211;help</strong></dt>
+<dd>Print a short help message</dd>
+<dt><strong>-V, &#8211;verbose</strong></dt>
+<dd>Print a slightly more verbose long report</dd>
+<dt><strong>-v, &#8211;version</strong></dt>
+<dd>Print version information</dd>
+</dl>
 
 
           </div>
@@ -66,22 +85,10 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">History</a><ul>
-<li><a class="reference internal" href="#id1">0.0.2 (2015-05-22)</a></li>
-<li><a class="reference internal" href="#id2">0.0.04 (2016-09-26)</a></li>
-</ul>
-</li>
-</ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="authors.html"
-                        title="previous chapter">Credits</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/history.txt"
+      <li><a href="_sources/arguments.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -108,9 +115,6 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="authors.html" title="Credits"
-             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>

@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>History &#8212; Git Lint 0.0.4 documentation</title>
+    <title>Strategies &#8212; Git Lint 0.0.4 documentation</title>
     
-    <link rel="stylesheet" href="static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -20,11 +20,10 @@
         HAS_SOURCE:  true
       };
     </script>
-    <script type="text/javascript" src="static/jquery.js"></script>
-    <script type="text/javascript" src="static/underscore.js"></script>
-    <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="Git Lint 0.0.4 documentation" href="index.html" />
-    <link rel="prev" title="Credits" href="authors.html" /> 
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Git Lint 0.0.4 documentation" href="index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -36,9 +35,6 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="authors.html" title="Credits"
-             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>  
@@ -48,16 +44,55 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="history">
-<h1>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id1">
-<h2>0.0.2 (2015-05-22)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>Pre-commit version</p>
-</div>
-<div class="section" id="id2">
-<h2>0.0.04 (2016-09-26)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p>Moved to &#8220;git lint&#8221; and optioned the hell out of it.</p>
-</div>
+  <div class="section" id="strategies">
+<h1>Strategies<a class="headerlink" href="#strategies" title="Permalink to this headline">¶</a></h1>
+<p>git-lint has a couple of phases in which it develops its strategy for what to run:</p>
+<ol class="arabic">
+<li><p class="first">Load the configuration file.
+a. On the command line?
+b. In the base directory as .git-lint?
+c. In the base directory as .git-lint/config?
+d. In the user&#8217;s home directory as .git-lint?
+e. In the user&#8217;s home directroy as .git-lint/config?</p>
+</li>
+<li><p class="first">Prune configuration with <code class="docutils literal"><span class="pre">-o</span></code> or <code class="docutils literal"><span class="pre">-e</span></code> options</p>
+</li>
+<li><p class="first">Determine which files to lint.
+a.   Workspace or staging?</p>
+<blockquote>
+<div><ol class="lowerroman simple">
+<li>If staging, record all stashed timestamps for restoration</li>
+</ol>
+</div></blockquote>
+<ol class="loweralpha" start="2">
+<li><dl class="first docutils">
+<dt>From this list:</dt>
+<dd><ol class="first last lowerroman simple">
+<li>All changed files <code class="docutils literal"><span class="pre">-b</span></code></li>
+<li>All changed files in the current directory and down (default)</li>
+<li>All files in the current directory and down. <code class="docutils literal"><span class="pre">-a</span></code></li>
+<li>All files in the repository <code class="docutils literal"><span class="pre">-a</span> <span class="pre">-b</span></code></li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><p class="first">Add files from command line, if any.</p>
+</li>
+<li><p class="first">Filter based on match criteria in configuration file.</p>
+</li>
+</ol>
+</li>
+<li><p class="first">For each file, run the appropriate linter.
+a.   If in delta mode <code class="docutils literal"><span class="pre">-d</span></code>, only show differences that correspond to user changes.
+b.   Capture failure output and failure status.</p>
+</li>
+<li><p class="first">Reduce failure status to pass/fail</p>
+</li>
+<li><p class="first">Print resulting messages and exit with failure status (for pre-commit).</p>
+</li>
+<li><p class="first">If staging, unstage and touch-up files to restore timestamps.</p>
+</li>
+</ol>
 </div>
 
 
@@ -66,22 +101,10 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">History</a><ul>
-<li><a class="reference internal" href="#id1">0.0.2 (2015-05-22)</a></li>
-<li><a class="reference internal" href="#id2">0.0.04 (2016-09-26)</a></li>
-</ul>
-</li>
-</ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="authors.html"
-                        title="previous chapter">Credits</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/history.txt"
+      <li><a href="_sources/strategies.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -108,9 +131,6 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="authors.html" title="Credits"
-             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>

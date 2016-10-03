@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>&lt;no title&gt; &#8212; Git Lint 0.0.4 documentation</title>
+    <title>git-lint(1) &#8212; Git Lint 0.0.4 documentation</title>
     
-    <link rel="stylesheet" href="static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -20,9 +20,9 @@
         HAS_SOURCE:  true
       };
     </script>
-    <script type="text/javascript" src="static/jquery.js"></script>
-    <script type="text/javascript" src="static/underscore.js"></script>
-    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Git Lint 0.0.4 documentation" href="index.html" /> 
   </head>
   <body role="document">
@@ -44,7 +44,29 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <dl class="docutils">
+  <div class="section" id="git-lint-1">
+<h1>git-lint(1)<a class="headerlink" href="#git-lint-1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="name">
+<h2>NAME<a class="headerlink" href="#name" title="Permalink to this headline">¶</a></h2>
+<p>git-lint - Run configured linters against changed files</p>
+</div>
+<div class="section" id="synopsis">
+<h2>SYNOPSIS<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
+<p>[verse]
+<code class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></code> [&lt;options&gt;...] [&lt;files...&gt;]</p>
+</div>
+<div class="section" id="description">
+<h2>DESCRIPTION<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Runs a list of configured linters against a specified list of files in
+your repository. By default all linters will be run against the
+changed files in your current workspace, from the current working
+directory on down.  Command line options let you choose a different
+directory, a different of files, the complete set of files, and even
+the files currently in the staging area.</p>
+</div>
+<div class="section" id="options">
+<h2>OPTIONS<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
 <dt><strong>-o &lt;linters&gt;,  &#8211;only=&lt;linters&gt;</strong></dt>
 <dd>A comma-separated list of only those linters to run.</dd>
 <dt><strong>-x &lt;linters&gt; &#8211;exclude=&lt;linters&gt;</strong></dt>
@@ -78,6 +100,32 @@
 <dt><strong>-v, &#8211;version</strong></dt>
 <dd>Print version information</dd>
 </dl>
+</div>
+<div class="section" id="output">
+<h2>OUTPUT<a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h2>
+<p>By default, the output is that of all the linters specified, in the
+order in which they appear in the configuration file, followed by
+every file specified, sorted ASCIIbetically.  This order can be
+flipped (files first, then linters) with the <code class="docutils literal"><span class="pre">--byfiles</span></code> option.</p>
+<p><code class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></code> returns the maximal error code if any linters fail a
+pass, or zero if they all succeed.</p>
+</div>
+<div class="section" id="configuration">
+<h2>CONFIGURATION<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></code> uses a standard INI-style configuration file.  Aside from the
+DEFAULT section, the name of each section is an alphanumeric token name for
+a linter, followed by configuration details for that linter.  Standard details
+are:</p>
+<ul class="simple">
+<li>output - Text to print before running a linter.</li>
+<li>command - The actual command to run, minus the file path</li>
+<li>match - A comma-separated list of extensions to match against the linter</li>
+<li>print - If true, will prefix each line of output from the linter with the filename</li>
+<li>condition - if &#8220;error&#8221;, the return code of the linter is the status of the pass.  If &#8220;output,&#8221; any output will result in a failure.</li>
+<li>comment - Text to include when running the <code class="docutils literal"><span class="pre">--linters</span></code> option</li>
+</ul>
+</div>
+</div>
 
 
           </div>
@@ -85,10 +133,23 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">git-lint(1)</a><ul>
+<li><a class="reference internal" href="#name">NAME</a></li>
+<li><a class="reference internal" href="#synopsis">SYNOPSIS</a></li>
+<li><a class="reference internal" href="#description">DESCRIPTION</a></li>
+<li><a class="reference internal" href="#options">OPTIONS</a></li>
+<li><a class="reference internal" href="#output">OUTPUT</a></li>
+<li><a class="reference internal" href="#configuration">CONFIGURATION</a></li>
+</ul>
+</li>
+</ul>
+
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/arguments.txt"
+      <li><a href="_sources/manual.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
