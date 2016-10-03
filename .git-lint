@@ -66,6 +66,6 @@ condition = error
 [readability]
 output = Running Text Style Check
 match = .rst
-command = git-lint-style
+command = git-lint-style --min=6 --max=12
 print = False
 condition = error
