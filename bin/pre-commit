@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from git_lint import load_config, run_linters, git_base
+from git_lint.git_lint import load_config, run_linters, git_base
+from git_lint.reporters import print_report
 
 import gettext
 _ = gettext.gettext
@@ -20,14 +21,14 @@ def main(*args):
      unlintable_filenames,
      cant_lint_filenames,
      broken_linter_names,
-     unfindable_filenames) = run_linters(options, config)
+     unfindable_filenames) = run_linters(pre_commit_options, config)
     
     print_report(results,
                  unlintable_filenames,
                  cant_lint_filenames,
                  broken_linter_names,
                  unfindable_filenames,
-                 options)
+                 pre_commit_options)
 
     if not len(results):
         return 0
