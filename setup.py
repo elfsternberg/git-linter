@@ -6,6 +6,8 @@ import os.path
 
 
 def get_data_files(prefix):
+    if prefix.startswith('/System/Library/Frameworks'):
+        return []
     return [(os.path.join(prefix, 'share/man/man1'), ['docs/_build/man/git-lint.1'])]
 
 

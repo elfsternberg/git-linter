@@ -32,4 +32,5 @@ the file's executable flag to ``true``:
 
 Please see the :ref:`api` for more details on options taken by the
 ``run_precommit()`` and ``run_gitlint`` commands.
-    
+
+There is an example ``pre-commit`` script shipped with ``git lint``.
