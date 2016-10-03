@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>git_lint.option_handler &#8212; Git Lint 0.0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Git Lint 0.0.4 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Git Lint 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for git_lint.option_handler</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2015 Elf M. Sternberg</span>
+<span class="c1"># Author: Elf M. Sternberg</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+<span class="kn">import</span> <span class="nn">getopt</span>
+
+<span class="c1"># This was a lot shorter and smarter in Hy...</span>
+
+<span class="c1"># A lot of what you see here is separated from git_lint itself, since this will not be</span>
+<span class="c1"># relevant to the operation of pre-commit.</span>
+
+<span class="c1">#   ___                              _   _    _</span>
+<span class="c1">#  / __|___ _ __  _ __  __ _ _ _  __| | | |  (_)_ _  ___</span>
+<span class="c1"># | (__/ _ \ &#39;  \| &#39;  \/ _` | &#39; \/ _` | | |__| | &#39; \/ -_)</span>
+<span class="c1">#  \___\___/_|_|_|_|_|_\__,_|_||_\__,_| |____|_|_||_\___|</span>
+<span class="c1">#</span>
+
+
+<div class="viewcode-block" id="cleanup_options"><a class="viewcode-back" href="../../git_lint.html#git_lint.option_handler.cleanup_options">[docs]</a><span class="k">def</span> <span class="nf">cleanup_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">commandline</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Takes a table of options and the commandline, and returns a</span>
+<span class="sd">       dictionary of those options that appear on the commandline</span>
+<span class="sd">       along with any extra arguments.</span>
+
+<span class="sd">    :param List(Tuple (string, string, boolean, string, List(string))) options,</span>
+<span class="sd">        The table of options: One-letter option, long option, takes arguments,</span>
+<span class="sd">        Help text, list of (long) options superseded by this one.</span>
+<span class="sd">    : param List(strings) commandline</span>
+<span class="sd">        The arguments as received by the start-up process</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">make_option_streamliner</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;Takes a list of option tuples, and returns a function that takes</span>
+<span class="sd">            the output of getopt and reduces it to the longopt key and</span>
+<span class="sd">            associated values as a dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fullset</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">fullset</span><span class="p">[</span><span class="s1">&#39;--&#39;</span> <span class="o">+</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">fullset</span><span class="p">[</span><span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">streamliner</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
+            <span class="n">acc</span><span class="p">[</span><span class="n">fullset</span><span class="p">[</span><span class="n">it</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">it</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">acc</span>
+
+        <span class="k">return</span> <span class="n">streamliner</span>
+
+    <span class="k">def</span> <span class="nf">remove_conflicted_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Takes our list of option tuples, and a cleaned copy of what was</span>
+<span class="sd">            requested from getopt, and returns a copy of the request</span>
+<span class="sd">            without any options that are marked as superseded, along with</span>
+<span class="sd">            the list of superseded options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">get_excluded_keys</span><span class="p">(</span><span class="n">memo</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">memo</span> <span class="o">+</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">opt</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="ow">or</span> <span class="p">[])</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">marked</span> <span class="o">=</span> <span class="p">[</span><span class="n">option</span> <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span> <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">get_excluded_keys</span><span class="p">,</span> <span class="n">marked</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">excluded</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">]</span>
+        <span class="n">cleaned</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">request</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span>
+                   <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">cleaned</span><span class="p">,</span> <span class="n">excluded</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">shortoptstogo</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">longoptstogo</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">optstringsshort</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">shortoptstogo</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="p">])</span>
+    <span class="n">optstringslong</span> <span class="o">=</span> <span class="p">[</span><span class="n">longoptstogo</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="p">]</span>
+    <span class="p">(</span><span class="n">chosen_options</span><span class="p">,</span> <span class="n">filenames</span><span class="p">)</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">getopt</span><span class="p">(</span><span class="n">commandline</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                                                <span class="n">optstringsshort</span><span class="p">,</span>
+                                                <span class="n">optstringslong</span><span class="p">)</span>
+
+    <span class="c1"># Turns what getopt returns into something more human-readable</span>
+    <span class="n">streamline_options</span> <span class="o">=</span> <span class="n">make_option_streamliner</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="c1"># Remove any options that are superseded by others.</span>
+    <span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">excluded</span><span class="p">)</span> <span class="o">=</span> <span class="n">remove_conflicted_options</span><span class="p">(</span>
+        <span class="n">options</span><span class="p">,</span> <span class="n">reduce</span><span class="p">(</span><span class="n">streamline_options</span><span class="p">,</span> <span class="n">chosen_options</span><span class="p">,</span> <span class="p">{}))</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">excluded</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Git Lint 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+    </div>
+  </body>
+</html>

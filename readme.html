@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Git Lint: README &#8212; Git Lint 0.0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Git Lint 0.0.4 documentation" href="index.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Welcome to Git Lint’s documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Git Lint’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="git-lint-readme">
+<h1>Git Lint: README<a class="headerlink" href="#git-lint-readme" title="Permalink to this headline">¶</a></h1>
+<p>A git command that automatically runs identifiable linters against
+changed files in your current git repository or staging area.</p>
+<ul class="simple">
+<li>Free software: MIT license</li>
+</ul>
+<p><strong>Git Lint</strong> runs a configurable set of syntax, style, and complexity
+checkers against changed files in your current working directory or
+staging area.  It can be configured to work with any <cite>lint</cite>-like
+command.  Some commands may require shell wrappers.</p>
+<p>While it may be possible to create a custom lint command in your npm,
+grunt, Make, CMake, or whatever, the fact is we all use a VCS, and most
+of us use git.  Having a centralized repository for what we want checked
+and how we want it checked, associated with git (and by extension, as a
+pre-commit hook), that can be run at any time for any reason.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>To lint only what&#8217;s changed recently in your current working directory:</dt>
+<dd><cite>git lint</cite></dd>
+<dt>To lint everything, changed or otherwise, from the current directory down:</dt>
+<dd><cite>git lint -a</cite></dd>
+<dt>To lint what&#8217;s changed from the repo&#8217;s base:</dt>
+<dd><cite>git lint -b</cite></dd>
+<dt>To lint what&#8217;s in your staging directory:</dt>
+<dd><cite>git lint -s</cite></dd>
+</dl>
+</div>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><cite>pip install git-linter</cite></div></blockquote>
+<p>You will need to copy the .git-lint configuration file to either your
+home directory or the repo`s base directory.  Edit the configuration
+file as needed.  You will also need any linters that you plan on
+running.</p>
+</div>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Highly configurable - configuration files, both for git-lint and
+individual linters, can be global or per-project.</li>
+<li>Only checks files that have been changed, but this can be overriden
+from the command line.</li>
+<li>Can be used directly as a pre-commit hook, to ensure you personally
+don&#8217;t check in anything broken.<ul>
+<li>Used this way, it checks the <em>staging</em> area, not your workspace.</li>
+<li>When using the staging area, it stashes your current work. Upon
+restoration of your workspace, it ensures the timestamps are the
+same, so as not to confuse your build system or IDE.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<p><cite>Git lint</cite> started life as a simple pre-commit hook.  Most of the
+changes since were inspired by Steve Pulec&#8217;s <em>`Why You Need a Git
+Pre-Commit Hook and Why Most Are Wrong`_ ,</em> as well as just my own needs as
+a software developer.</p>
+</div>
+<div class="section" id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Permalink to this headline">¶</a></h2>
+<p>This software, including provided configuration and documentation
+materials, is provided &#8220;as is&#8221; without any warranties, including any
+implied warranties of merchantability, fitness, performance, or
+quality.  In no event shall the author or sponsor be liable for any
+special, direct, indirect, or consequential damages or any damages
+whatsoever resulting from loss of use, data or profits, whether in an
+action of contract, negligence or other tortious action, arising out
+of or in connection with the use or performance of this software.
+Each user of the program will agree and understand, and be deemed to
+have agreed and understood, that there is no warranty whatsoever for
+the program and, accordingly, the entire risk arising from or
+otherwise connected with the program is assumed by the user.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Git Lint: README</a><ul>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#install">Install</a></li>
+<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+<li><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Git Lint&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">Installation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/readme.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Git Lint’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+    </div>
+  </body>
+</html>
