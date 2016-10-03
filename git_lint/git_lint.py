@@ -318,33 +318,33 @@ def get_filelist(options, extras):
 #              |___/       |___/                  |_|  |_|
 
 
-class Runner:
-    def __init__(self, options):
-        self.runner = ('staging' in options and Runner.staging_wrapper) or Runner.workspace_wrapper
+class StagingRunner:
+    def __init__(self, filenames):
+        self.filenames = filenames
 
-    def __call__(self, run_linters, filenames):
-        return self.runner(run_linters, filenames)
-
-    @staticmethod
-    def staging_wrapper(run_linters, filenames):
+    def __enter__(self):
         def time_gather(f):
             stats = os.stat(f)
             return (f, (stats.st_atime, stats.st_mtime))
-
-        times = [time_gather(file) for file in filenames]
+        self.times = [time_gather(filename) for filename in self.filenames]
         run_git_command(['stash', '--keep-index'])
 
-        results = run_linters()
+    def __exit__(self, type, value, traceback):
         run_git_command(['reset', '--hard'])
         run_git_command(['stash', 'pop', '--quiet', '--index'])
-
-        for (filename, timepair) in times:
+        for (filename, timepair) in self.times:
             os.utime(filename, timepair)
-        return results
 
-    @staticmethod
-    def workspace_wrapper(run_linters, filenames):
-        return run_linters()
+
+class WorkspaceRunner(object):
+    def __init__(self, filenames):
+        pass
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, type, value, traceback):
+        pass
 
 
 #  ___             _ _     _
@@ -368,7 +368,7 @@ class Linters:
         """Run one linter against one file.
 
         If the result matches the error condition specified in the configuration file,
-        return the error code and messages, either return nothing.
+        return the error code and messages, otherwise return nothing.
         """
 
         cmd = linter['command'] + ' "' + filename + '"'
@@ -444,7 +444,9 @@ def run_linters(options, config, extras=[]):
     cant_lint_filenames = [filename for filename in lintable_filenames
                            if cant_lint_filter(filename)]
 
-    runner = Runner(options)
+    runner = WorkspaceRunner
+    if 'staging' in options:
+        runner = StagingRunner
 
     linters = Linters(build_config_subset(working_linter_names),
                       sorted(lintable_filenames))
@@ -454,7 +456,8 @@ def run_linters(options, config, extras=[]):
         return (dryrun_results, unlintable_filenames, cant_lint_filenames,
                 broken_linter_names, unfindable_filenames)
 
-    results = runner(linters, lintable_filenames)
+    with runner(lintable_filenames):
+        results = linters()
 
     return (results, unlintable_filenames, cant_lint_filenames,
             broken_linter_names, unfindable_filenames)

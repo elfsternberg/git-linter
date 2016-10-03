@@ -1,23 +1,49 @@
 ===============================
-Git Lint
+Git Lint: README
 ===============================
 
 A git command that automatically runs identifiable linters against
-changed files in current repository or staging.
+changed files in your current git repository or staging area.
 
 * Free software: MIT license
 
 **Git Lint** runs a configurable set of syntax, style, and complexity
 checkers against changed files in your current working directory or
-staging area.  It can be configured to work with any `lint` command.
-Some commands may require shell wrappers.
+staging area.  It can be configured to work with any `lint`-like
+command.  Some commands may require shell wrappers.
 
 While it may be possible to create a custom lint command in your npm,
-grunt, Make, CMake, or whatever, the fact is we all use a VCS, and
-most of us use git.  Having a centralized repository for what we want
-checked and how we want it checked, associated with git (and by
-extension, as a pre-commit hook), that can be run at any time for any
-reason.
+grunt, Make, CMake, or whatever, the fact is we all use a VCS, and most
+of us use git.  Having a centralized repository for what we want checked
+and how we want it checked, associated with git (and by extension, as a
+pre-commit hook), that can be run at any time for any reason.
+
+Usage
+-----
+
+To lint only what's changed recently in your current working directory:
+    `git lint`
+
+To lint everything, changed or otherwise, from the current directory down:
+    `git lint -a`
+
+To lint what's changed from the repo's base:
+    `git lint -b`
+
+To lint what's in your staging directory:
+    `git lint -s`
+
+
+Install
+-------
+
+    `pip install git-linter`
+
+You will need to copy the .git-lint configuration file to either your
+home directory or the repo`s base directory.  Edit the configuration
+file as needed.  You will also need any linters that you plan on
+running.
+
 
 Features
 --------
@@ -37,11 +63,16 @@ Features
     restoration of your workspace, it ensures the timestamps are the
     same, so as not to confuse your build system or IDE.
 
-Credits
--------
 
-The completion of this project was graciously sponsored by my employer,
-Splunk <http://splunk.com>.
+Acknowledgements
+----------------
+`Git lint` started life as a simple pre-commit hook.  Most of the
+changes since were inspired by Steve Pulec's Why You Need a Git
+Pre-Commit Hook and Why Most Are Wrong_, as well as just my own needs as
+a software developer.
+
+.. _Why You Need a Git Pre-Commit Hook and Why Most Are Wrong: https://dzone.com/articles/why-your-need-git-pre-commit
+
 
 Disclaimer
 ----------

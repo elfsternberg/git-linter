@@ -102,6 +102,17 @@ def test_02_empty_repository():
         assert stderr.startswith('No configuration file found,')
 
 
+# It should behave well when the repository is empty and we're
+# running against staging.
+        
+def test_02b_empty_repository():
+    with gittemp() as path:
+        os.chdir(path)
+        shell('git init')
+        (stdout, stderr, rc) = fullshell('git lint -s')
+        assert stderr.startswith('No configuration file found,')
+        
+
 def test_03_simple_repository():
     with gittemp() as path:
         os.chdir(path)

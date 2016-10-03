@@ -32,6 +32,8 @@ OPTIONS = [
      _('Path to config file'), []),
     ('h', 'help', False,
      _('This help message'), []),
+    ('V', 'verbose', False,
+     _('A slightly more verbose output'), []),
     ('v', 'version', False,
      _('Version information'), [])
 ]

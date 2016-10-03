@@ -1,5 +1,6 @@
 from __future__ import print_function
 from .git_lint import load_config, run_linters, git_base
+import operator
 import gettext
 _ = gettext.gettext
 
@@ -30,22 +31,34 @@ def print_report(results, unlintable_filenames, cant_lint_filenames,
         sort_position = 0
         grouping = _('Filename: {}')
     grouped_results = group_by(results, sort_position)
+
     for group in grouped_results:
+        messages = reduce(operator.add, [item[3] for item in group[1]], [])
+        if len(messages) == 0:
+            continue
         print(grouping.format(group[0]))
         for (filename, lintername, returncode, text) in group[1]:
-            print('\n'.join(base_file_cleaner(text)))
-        print('')
-    if len(broken_linter_names):
+            if text:
+                print('\n'.join(base_file_cleaner(text)))
+                print('')
+        print ('')
+
+    if len(broken_linter_names) and (len(cant_lint_filenames) or ('verbose' in options)):
         print(_('These linters could not be run:'), ','.join(broken_linter_names))
         if len(cant_lint_filenames):
             print(_('As a result, these files were not linted:'))
             print('\n'.join(['    {}'.format(f) for f in cant_lint_filenames]))
-    if len(unlintable_filenames):
+        print('')
+
+    if len(unlintable_filenames) and ('verbose' in options):
         print(_('The following files had no recognizeable linters:'))
         print('\n'.join(['    {}'.format(f) for f in unlintable_filenames]))
+        print('')
+
     if len(unfindable_filenames):
         print(_('The following files could not be found:'))
         print('\n'.join(['    {}'.format(f) for f in unfindable_filenames]))
+        print('')
 
         
 def print_help(options, name):
