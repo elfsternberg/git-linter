@@ -44,9 +44,9 @@ def print_report(results, unlintable_filenames, cant_lint_filenames,
         print ('')
 
     if len(broken_linter_names) and (len(cant_lint_filenames) or ('verbose' in options)):
-        print(_('These linters could not be run:'), ','.join(broken_linter_names))
+        print(_('Linters not found:'), ','.join(broken_linter_names))
         if len(cant_lint_filenames):
-            print(_('Files not linted:'))
+            print('  ' + _('Files not linted:'))
             print('\n'.join(['    {}'.format(f) for f in cant_lint_filenames]))
         print('')
 
@@ -56,7 +56,7 @@ def print_report(results, unlintable_filenames, cant_lint_filenames,
         print('')
 
     if len(unfindable_filenames):
-        print(_('Files not be found:'))
+        print(_('Files not found:'))
         print('\n'.join(['    {}'.format(f) for f in unfindable_filenames]))
         print('')
 
