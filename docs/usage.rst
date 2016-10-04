@@ -1,7 +1,7 @@
 =====
 Usage
 =====
-
+ 
 Command Line
 ------------
 
@@ -12,7 +12,7 @@ git lint [options] [filenames]
 Options
 -------
 
-.. include: arguments.rst
+.. include:: arguments.rst
 
 As a pre-commit hook:
 ---------------------
