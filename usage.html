@@ -71,6 +71,40 @@
 </div>
 <div class="section" id="options">
 <h2><a class="toc-backref" href="#id3">Options</a><a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><strong>-o &lt;linters&gt;,  &#8211;only=&lt;linters&gt;</strong></dt>
+<dd>A comma-separated list of only those linters to run.</dd>
+<dt><strong>-x &lt;linters&gt; &#8211;exclude=&lt;linters&gt;</strong></dt>
+<dd>A comma-separated list of linters to skip.</dd>
+<dt><strong>-l, &#8211;linters</strong></dt>
+<dd>Show the list of configured linters.</dd>
+<dt><strong>-b, &#8211;base</strong></dt>
+<dd>Check all changed files from GIT_DIR, not just those in the current directory and down.</dd>
+<dt><strong>-a, &#8211;all</strong></dt>
+<dd>Scan all files, not just those that have changed.</dd>
+<dt><strong>-e, &#8211;every</strong></dt>
+<dd>Scan all files, not just those that have changed, from GIT_DIR.  Short for -b -a</dd>
+<dt><strong>-w, &#8211;workspace</strong></dt>
+<dd>Scan the workspace [default]</dd>
+<dt><strong>-s, &#8211;staging</strong></dt>
+<dd>Scan the staging area (useful for pre-commit).</dd>
+<dt><strong>-c &lt;path&gt;, &#8211;config=&lt;path&gt;</strong></dt>
+<dd>Path to config file</dd>
+<dt><strong>-t, &#8211;bylinter</strong></dt>
+<dd>Group reports by linter first as they appear in the config file [default]</dd>
+<dt><strong>-f, &#8211;byfile</strong></dt>
+<dd>Group reports by file first, linter second</dd>
+<dt><strong>-d, &#8211;dryrun</strong></dt>
+<dd>Report what git-lint would do, but don&#8217;t actually do anything.</dd>
+<dt><strong>-q, &#8211;quiet</strong></dt>
+<dd>Produce a short report of file that failed to pass.</dd>
+<dt><strong>-h, &#8211;help</strong></dt>
+<dd>Print a short help message</dd>
+<dt><strong>-V, &#8211;verbose</strong></dt>
+<dd>Print a slightly more verbose long report</dd>
+<dt><strong>-v, &#8211;version</strong></dt>
+<dd>Print version information</dd>
+</dl>
 </div>
 <div class="section" id="as-a-pre-commit-hook">
 <h2><a class="toc-backref" href="#id4">As a pre-commit hook:</a><a class="headerlink" href="#as-a-pre-commit-hook" title="Permalink to this headline">¶</a></h2>

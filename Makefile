@@ -8,6 +8,7 @@ master:
 
 docs: master
 	cd master && git pull origin master && make docs
+	rm -fr _modules _static _sources modules static sources
 	mv master/docs/_build/html/* .
 	mv _modules modules
 	mv _static static
