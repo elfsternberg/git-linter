@@ -6,9 +6,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>git_lint package &#8212; Git Lint 0.0.4 documentation</title>
+    <title>git_lint package &mdash; Git Lint 0.0.4 documentation</title>
     
-    <link rel="stylesheet" href="static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -25,8 +25,8 @@
     <script type="text/javascript" src="static/doctools.js"></script>
     <link rel="top" title="Git Lint 0.0.4 documentation" href="index.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -35,14 +35,14 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
+        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="git-lint-package">
 <h1>git_lint package<a class="headerlink" href="#git-lint-package" title="Permalink to this headline">¶</a></h1>
@@ -53,20 +53,20 @@
 <span id="git-lint-git-lint-module"></span><h2>git_lint.git_lint module<a class="headerlink" href="#module-git_lint.git_lint" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="git_lint.git_lint.Linters">
-<em class="property">class </em><code class="descclassname">git_lint.git_lint.</code><code class="descname">Linters</code><span class="sig-paren">(</span><em>linters</em>, <em>filenames</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#Linters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">Linters</tt><big>(</big><em>linters</em>, <em>filenames</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#Linters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="git_lint.git_lint.Linters.dryrun">
-<code class="descname">dryrun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#Linters.dryrun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters.dryrun" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dryrun</tt><big>(</big><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#Linters.dryrun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters.dryrun" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
 <dt id="git_lint.git_lint.Linters.encode_shell_messages">
-<em class="property">static </em><code class="descname">encode_shell_messages</code><span class="sig-paren">(</span><em>prefix</em>, <em>messages</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#Linters.encode_shell_messages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters.encode_shell_messages" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><tt class="descname">encode_shell_messages</tt><big>(</big><em>prefix</em>, <em>messages</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#Linters.encode_shell_messages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters.encode_shell_messages" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
 <dt id="git_lint.git_lint.Linters.run_external_linter">
-<em class="property">static </em><code class="descname">run_external_linter</code><span class="sig-paren">(</span><em>filename</em>, <em>linter</em>, <em>linter_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#Linters.run_external_linter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters.run_external_linter" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><tt class="descname">run_external_linter</tt><big>(</big><em>filename</em>, <em>linter</em>, <em>linter_name</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#Linters.run_external_linter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters.run_external_linter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run one linter against one file.</p>
 <p>If the result matches the error condition specified in the configuration file,
 return the error code and messages, otherwise return nothing.</p>
@@ -74,7 +74,7 @@ return the error code and messages, otherwise return nothing.</p>
 
 <dl class="staticmethod">
 <dt id="git_lint.git_lint.Linters.run_one_linter">
-<em class="property">static </em><code class="descname">run_one_linter</code><span class="sig-paren">(</span><em>linter</em>, <em>filenames</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#Linters.run_one_linter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters.run_one_linter" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><tt class="descname">run_one_linter</tt><big>(</big><em>linter</em>, <em>filenames</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#Linters.run_one_linter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.Linters.run_one_linter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs one linter against a set of files</p>
 <p>Creates a match filter for the linter, extract the files to be
 linted, and runs the linter against each file, returning the
@@ -86,33 +86,33 @@ return code and the output of the lint process.</p>
 
 <dl class="class">
 <dt id="git_lint.git_lint.MatchFilter">
-<em class="property">class </em><code class="descclassname">git_lint.git_lint.</code><code class="descname">MatchFilter</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#MatchFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.MatchFilter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">MatchFilter</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#MatchFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.MatchFilter" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="staticmethod">
 <dt id="git_lint.git_lint.MatchFilter.make_match_filter_matcher">
-<em class="property">static </em><code class="descname">make_match_filter_matcher</code><span class="sig-paren">(</span><em>extensions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#MatchFilter.make_match_filter_matcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.MatchFilter.make_match_filter_matcher" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><tt class="descname">make_match_filter_matcher</tt><big>(</big><em>extensions</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#MatchFilter.make_match_filter_matcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.MatchFilter.make_match_filter_matcher" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="git_lint.git_lint.StagingRunner">
-<em class="property">class </em><code class="descclassname">git_lint.git_lint.</code><code class="descname">StagingRunner</code><span class="sig-paren">(</span><em>filenames</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#StagingRunner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.StagingRunner" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">StagingRunner</tt><big>(</big><em>filenames</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#StagingRunner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.StagingRunner" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="class">
 <dt id="git_lint.git_lint.WorkspaceRunner">
-<em class="property">class </em><code class="descclassname">git_lint.git_lint.</code><code class="descname">WorkspaceRunner</code><span class="sig-paren">(</span><em>filenames</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#WorkspaceRunner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.WorkspaceRunner" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">WorkspaceRunner</tt><big>(</big><em>filenames</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#WorkspaceRunner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.WorkspaceRunner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 </dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.executable_exists">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">executable_exists</code><span class="sig-paren">(</span><em>script</em>, <em>label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#executable_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.executable_exists" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">executable_exists</tt><big>(</big><em>script</em>, <em>label</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#executable_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.executable_exists" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.find_config_file">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">find_config_file</code><span class="sig-paren">(</span><em>options</em>, <em>base</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#find_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.find_config_file" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">find_config_file</tt><big>(</big><em>options</em>, <em>base</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#find_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.find_config_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the configuration file from a prioritized list of locations.</p>
 <dl class="docutils">
 <dt>Locations are prioritized as:</dt>
@@ -130,48 +130,48 @@ return code and the output of the lint process.</p>
 
 <dl class="function">
 <dt id="git_lint.git_lint.get_filelist">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">get_filelist</code><span class="sig-paren">(</span><em>options</em>, <em>extras</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#get_filelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_filelist" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">get_filelist</tt><big>(</big><em>options</em>, <em>extras</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#get_filelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_filelist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the list of files against which we&#8217;ll run the linters.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.get_git_base">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">get_git_base</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#get_git_base"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_git_base" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">get_git_base</tt><big>(</big><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#get_git_base"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_git_base" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.get_git_head">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">get_git_head</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#get_git_head"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_git_head" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">get_git_head</tt><big>(</big><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#get_git_head"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_git_head" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.get_git_response">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">get_git_response</code><span class="sig-paren">(</span><em>cmd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#get_git_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_git_response" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">get_git_response</tt><big>(</big><em>cmd</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#get_git_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_git_response" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.get_git_response_raw">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">get_git_response_raw</code><span class="sig-paren">(</span><em>cmd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#get_git_response_raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_git_response_raw" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">get_git_response_raw</tt><big>(</big><em>cmd</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#get_git_response_raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_git_response_raw" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.get_linter_status">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">get_linter_status</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#get_linter_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_linter_status" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">get_linter_status</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#get_linter_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_linter_status" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.get_shell_response">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">get_shell_response</code><span class="sig-paren">(</span><em>fullcmd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#get_shell_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_shell_response" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">get_shell_response</tt><big>(</big><em>fullcmd</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#get_shell_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_shell_response" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.get_working_linter_names">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">get_working_linter_names</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#get_working_linter_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_working_linter_names" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">get_working_linter_names</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#get_working_linter_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_working_linter_names" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.load_config">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">load_config</code><span class="sig-paren">(</span><em>options</em>, <em>base</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#load_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.load_config" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">load_config</tt><big>(</big><em>options</em>, <em>base</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#load_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.load_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads the git-lint configuration file.</p>
 <p>Returns the configuration file as a dictionary of dictionaries.
 Performs substitutions as specified in the SafeConfigParser
@@ -184,17 +184,17 @@ files for specific linters.</p>
 
 <dl class="function">
 <dt id="git_lint.git_lint.run_git_command">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">run_git_command</code><span class="sig-paren">(</span><em>cmd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#run_git_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.run_git_command" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">run_git_command</tt><big>(</big><em>cmd</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#run_git_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.run_git_command" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.run_linters">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">run_linters</code><span class="sig-paren">(</span><em>options</em>, <em>config</em>, <em>extras=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#run_linters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.run_linters" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">run_linters</tt><big>(</big><em>options</em>, <em>config</em>, <em>extras=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#run_linters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.run_linters" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.git_lint.split_git_response">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">split_git_response</code><span class="sig-paren">(</span><em>cmd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/git_lint.html#split_git_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.split_git_response" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.git_lint.</tt><tt class="descname">split_git_response</tt><big>(</big><em>cmd</em><big>)</big><a class="reference internal" href="modules/git_lint/git_lint.html#split_git_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.split_git_response" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -202,7 +202,7 @@ files for specific linters.</p>
 <span id="git-lint-option-handler-module"></span><h2>git_lint.option_handler module<a class="headerlink" href="#module-git_lint.option_handler" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="git_lint.option_handler.cleanup_options">
-<code class="descclassname">git_lint.option_handler.</code><code class="descname">cleanup_options</code><span class="sig-paren">(</span><em>options</em>, <em>commandline</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/option_handler.html#cleanup_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.option_handler.cleanup_options" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.option_handler.</tt><tt class="descname">cleanup_options</tt><big>(</big><em>options</em>, <em>commandline</em><big>)</big><a class="reference internal" href="modules/git_lint/option_handler.html#cleanup_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.option_handler.cleanup_options" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Takes a table of options and the commandline, and returns a</dt>
 <dd>dictionary of those options that appear on the commandline
@@ -223,32 +223,32 @@ Help text, list of (long) options superseded by this one.</dd>
 <span id="git-lint-reporters-module"></span><h2>git_lint.reporters module<a class="headerlink" href="#module-git_lint.reporters" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="git_lint.reporters.base_file_cleaner">
-<code class="descclassname">git_lint.reporters.</code><code class="descname">base_file_cleaner</code><span class="sig-paren">(</span><em>files</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/reporters.html#base_file_cleaner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.base_file_cleaner" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.reporters.</tt><tt class="descname">base_file_cleaner</tt><big>(</big><em>files</em><big>)</big><a class="reference internal" href="modules/git_lint/reporters.html#base_file_cleaner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.base_file_cleaner" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.reporters.group_by">
-<code class="descclassname">git_lint.reporters.</code><code class="descname">group_by</code><span class="sig-paren">(</span><em>iterable</em>, <em>field_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/reporters.html#group_by"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.group_by" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.reporters.</tt><tt class="descname">group_by</tt><big>(</big><em>iterable</em>, <em>field_id</em><big>)</big><a class="reference internal" href="modules/git_lint/reporters.html#group_by"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.group_by" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.reporters.print_help">
-<code class="descclassname">git_lint.reporters.</code><code class="descname">print_help</code><span class="sig-paren">(</span><em>options</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/reporters.html#print_help"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.print_help" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.reporters.</tt><tt class="descname">print_help</tt><big>(</big><em>options</em>, <em>name</em><big>)</big><a class="reference internal" href="modules/git_lint/reporters.html#print_help"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.print_help" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.reporters.print_linters">
-<code class="descclassname">git_lint.reporters.</code><code class="descname">print_linters</code><span class="sig-paren">(</span><em>config</em>, <em>broken_linter_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/reporters.html#print_linters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.print_linters" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.reporters.</tt><tt class="descname">print_linters</tt><big>(</big><em>config</em>, <em>broken_linter_names</em><big>)</big><a class="reference internal" href="modules/git_lint/reporters.html#print_linters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.print_linters" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.reporters.print_report">
-<code class="descclassname">git_lint.reporters.</code><code class="descname">print_report</code><span class="sig-paren">(</span><em>results</em>, <em>unlintable_filenames</em>, <em>cant_lint_filenames</em>, <em>broken_linter_names</em>, <em>unfindable_filenames</em>, <em>options={'bylinter': True}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/reporters.html#print_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.print_report" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.reporters.</tt><tt class="descname">print_report</tt><big>(</big><em>results</em>, <em>unlintable_filenames</em>, <em>cant_lint_filenames</em>, <em>broken_linter_names</em>, <em>unfindable_filenames</em>, <em>options={'bylinter': True}</em><big>)</big><a class="reference internal" href="modules/git_lint/reporters.html#print_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.print_report" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="git_lint.reporters.print_version">
-<code class="descclassname">git_lint.reporters.</code><code class="descname">print_version</code><span class="sig-paren">(</span><em>name</em>, <em>version</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/git_lint/reporters.html#print_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.print_version" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">git_lint.reporters.</tt><tt class="descname">print_version</tt><big>(</big><em>name</em>, <em>version</em><big>)</big><a class="reference internal" href="modules/git_lint/reporters.html#print_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.print_version" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -261,7 +261,7 @@ Help text, list of (long) options superseded by this one.</dd>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -276,28 +276,29 @@ Help text, list of (long) options superseded by this one.</dd>
 </li>
 </ul>
 
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/git_lint.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="sources/git_lint.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -306,12 +307,12 @@ Help text, list of (long) options superseded by this one.</dd>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
+        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+    <div class="footer">
+        &copy; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

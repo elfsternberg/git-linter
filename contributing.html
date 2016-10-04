@@ -6,9 +6,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Contributing &#8212; Git Lint 0.0.4 documentation</title>
+    <title>Contributing &mdash; Git Lint 0.0.4 documentation</title>
     
-    <link rel="stylesheet" href="static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -27,8 +27,8 @@
     <link rel="next" title="Credits" href="authors.html" />
     <link rel="prev" title="Usage" href="usage.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,14 +43,14 @@
         <li class="right" >
           <a href="usage.html" title="Usage"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
+        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="contributing">
 <h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
@@ -104,34 +104,34 @@ are welcome :)</li>
 <li><p class="first">Fork the <cite>git_lint</cite> repo on GitHub.</p>
 </li>
 <li><p class="first">Clone your fork locally:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>$ git clone git@github.com:your_name_here/git_lint.git
+<div class="highlight-shell"><div class="highlight"><pre>$ git clone git@github.com:your_name_here/git_lint.git
 </pre></div>
 </div>
 </li>
 <li><p class="first">Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>$ mkvirtualenv git_lint
-$ <span class="nb">cd</span> git_lint/
+<div class="highlight-shell"><div class="highlight"><pre>$ mkvirtualenv git_lint
+$ cd git_lint/
 $ python setup.py develop
 </pre></div>
 </div>
 </li>
 <li><p class="first">Create a branch for local development:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>$ git checkout -b name-of-your-bugfix-or-feature
+<div class="highlight-shell"><div class="highlight"><pre>$ git checkout -b name-of-your-bugfix-or-feature
 </pre></div>
 </div>
 <p>Now you can make your changes locally.</p>
 </li>
 <li><p class="first">When you&#8217;re done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>$ flake8 git_lint tests
-$ python setup.py <span class="nb">test</span> or py.test
+<div class="highlight-shell"><div class="highlight"><pre>$ flake8 git_lint tests
+$ python setup.py test or py.test
 $ tox
 </pre></div>
 </div>
 <p>To get flake8 and tox, just pip install them into your virtualenv.</p>
 </li>
 <li><p class="first">Commit your changes and push your branch to GitHub:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>$ git add .
-$ git commit -m <span class="s2">&quot;Your detailed description of your changes.&quot;</span>
+<div class="highlight-shell"><div class="highlight"><pre>$ git add .
+$ git commit -m &quot;Your detailed description of your changes.&quot;
 $ git push origin name-of-your-bugfix-or-feature
 </pre></div>
 </div>
@@ -156,7 +156,7 @@ and make sure that the tests pass for all supported Python versions.</li>
 <div class="section" id="tips">
 <h2>Tips<a class="headerlink" href="#tips" title="Permalink to this headline">¶</a></h2>
 <p>To run a subset of tests:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>$ py.test tests.test_git_lint
+<div class="highlight-shell"><div class="highlight"><pre>$ py.test tests.test_git_lint
 </pre></div>
 </div>
 </div>
@@ -166,7 +166,7 @@ and make sure that the tests pass for all supported Python versions.</li>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -192,28 +192,29 @@ and make sure that the tests pass for all supported Python versions.</li>
   <h4>Next topic</h4>
   <p class="topless"><a href="authors.html"
                         title="next chapter">Credits</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/contributing.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="sources/contributing.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -228,12 +229,12 @@ and make sure that the tests pass for all supported Python versions.</li>
         <li class="right" >
           <a href="usage.html" title="Usage"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
+        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+    <div class="footer">
+        &copy; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
