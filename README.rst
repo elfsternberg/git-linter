@@ -34,6 +34,15 @@ To lint what's in your staging directory:
     `git lint -s`
 
 
+Documentation
+-------------
+
+Complete documentation for the project is available in the docs directory, or at `Git
+Linter Docs <https://elfsternberg.github.io/git-linter/index.html>`_.
+
+
+
+    
 Install
 -------
 
@@ -66,12 +75,11 @@ Features
 
 Acknowledgements
 ----------------
-`Git lint` started life as a simple pre-commit hook.  Most of the
-changes since were inspired by Steve Pulec's *`Why You Need a Git
-Pre-Commit Hook and Why Most Are Wrong`_ ,* as well as just my own needs as
-a software developer.
 
-.. _Why You Need a Git Pre-Commit Hook and Why Most Are Wrong: https://dzone.com/articles/why-your-need-git-pre-commit
+`Git lint` started life as a simple pre-commit hook.  Most of the changes since were
+inspired by Steve Pulec's *`Why You Need a Git Pre-Commit Hook and Why Most Are Wrong
+<https://dzone.com/articles/why-your-need-git-pre-commit>`_*, as well as just my own needs
+as a software developer.
 
 
 Disclaimer
