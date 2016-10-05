@@ -2,6 +2,8 @@
 
 help:
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
+	@echo "clean - clean up generated documentation"
+	@echo "realclean - clean out imported master copy"
 
 master:
 	git clone -b master `git config --get remote.origin.url` master
