@@ -10,3 +10,4 @@ recursive-exclude * *.py[co]
 
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif *.1
 include docs/_build/man/git-lint.1
+include bin/pre-commit bin/git-lint-style

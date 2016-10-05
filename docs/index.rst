@@ -3,8 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Git Lint's documentation!
-======================================
+Git Lint
+========
+
+Git Lint provides a new git command that automatically runs identifiable linters (style
+and syntax quality assurance programs) against changed files in your current git
+repository or staging area.
 
 Contents:
 
