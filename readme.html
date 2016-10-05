@@ -6,9 +6,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Git Lint: README &mdash; Git Lint 0.0.4 documentation</title>
+    <title>Git Lint: README &#8212; Git Lint 0.0.4 documentation</title>
     
-    <link rel="stylesheet" href="static/default.css" type="text/css" />
+    <link rel="stylesheet" href="static/classic.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -27,8 +27,8 @@
     <link rel="next" title="Installation" href="installation.html" />
     <link rel="prev" title="Welcome to Git Lint’s documentation!" href="index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,14 +43,14 @@
         <li class="right" >
           <a href="index.html" title="Welcome to Git Lint’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="git-lint-readme">
 <h1>Git Lint: README<a class="headerlink" href="#git-lint-readme" title="Permalink to this headline">¶</a></h1>
@@ -81,14 +81,27 @@ pre-commit hook), that can be run at any time for any reason.</p>
 <dd><cite>git lint -s</cite></dd>
 </dl>
 </div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>Complete documentation for the project is available in the docs directory, or at <a class="reference external" href="https://elfsternberg.github.io/git-linter/index.html">Git
+Linter Docs</a>.</p>
+</div>
 <div class="section" id="install">
 <h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<p>This <em>ought</em> to work:</p>
 <blockquote>
 <div><cite>pip install git-linter</cite></div></blockquote>
 <p>You will need to copy the .git-lint configuration file to either your
 home directory or the repo`s base directory.  Edit the configuration
 file as needed.  You will also need any linters that you plan on
 running.</p>
+<p>As git-linter is still mostly alpha code, it might be better to install
+from source:</p>
+<blockquote>
+<div>``
+git clone <a class="reference external" href="https://github.com/elfsternberg/git-linter">https://github.com/elfsternberg/git-linter</a>
+python setup.py install
+``</div></blockquote>
 </div>
 <div class="section" id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
@@ -109,10 +122,9 @@ same, so as not to confuse your build system or IDE.</li>
 </div>
 <div class="section" id="acknowledgements">
 <h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
-<p><cite>Git lint</cite> started life as a simple pre-commit hook.  Most of the
-changes since were inspired by Steve Pulec&#8217;s <em>`Why You Need a Git
-Pre-Commit Hook and Why Most Are Wrong`_ ,</em> as well as just my own needs as
-a software developer.</p>
+<p><cite>Git lint</cite> started life as a simple pre-commit hook.  Most of the changes since were
+inspired by Steve Pulec&#8217;s <a class="reference external" href="https://dzone.com/articles/why-your-need-git-pre-commit">Why You Need a Git Pre-Commit Hook and Why Most Are Wrong</a>, as well as just my own needs
+as a software developer.</p>
 </div>
 <div class="section" id="disclaimer">
 <h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Permalink to this headline">¶</a></h2>
@@ -135,12 +147,13 @@ otherwise connected with the program is assumed by the user.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Git Lint: README</a><ul>
 <li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
 <li><a class="reference internal" href="#install">Install</a></li>
 <li><a class="reference internal" href="#features">Features</a></li>
 <li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
@@ -155,29 +168,28 @@ otherwise connected with the program is assumed by the user.</p>
   <h4>Next topic</h4>
   <p class="topless"><a href="installation.html"
                         title="next chapter">Installation</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="sources/readme.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="sources/readme.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -192,12 +204,12 @@ otherwise connected with the program is assumed by the user.</p>
         <li class="right" >
           <a href="index.html" title="Welcome to Git Lint’s documentation!"
              >previous</a> |</li>
-        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
     </div>
   </body>
 </html>

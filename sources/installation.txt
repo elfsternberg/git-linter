@@ -12,7 +12,7 @@ To install Git Lint, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install git_linter
+    $ pip install git-linter
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -30,13 +30,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/elfsternberg/git_linter
+    $ git clone git://github.com/elfsternberg/git-linter
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/elfsternberg/git_linter/tarball/master
+    $ curl  -OL https://github.com/elfsternberg/git-linter/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -44,9 +44,8 @@ Once you have a copy of the source, you can install it with:
 
     $ python setup.py install
 
-.. _Github repo: https://github.com/elfsternberg/git_linter
-.. _tarball: https://github.com/elfsternberg/git_linter/tarball/master
+.. _Github repo: https://github.com/elfsternberg/git-linter
+.. _tarball: https://github.com/elfsternberg/git-linter/tarball/master
 
 Once installed, please copy the '.git-lint' example file.  You may install this either in
-your home directory as ``.git-lint`` or in your project's git directory as
-``.git/lint/git-lint``
+your home or repository directory as ``.git-lint``.

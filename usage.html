@@ -6,9 +6,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Usage &mdash; Git Lint 0.0.4 documentation</title>
+    <title>Usage &#8212; Git Lint 0.0.4 documentation</title>
     
-    <link rel="stylesheet" href="static/default.css" type="text/css" />
+    <link rel="stylesheet" href="static/classic.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -27,8 +27,8 @@
     <link rel="next" title="Contributing" href="contributing.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,14 +43,14 @@
         <li class="right" >
           <a href="installation.html" title="Installation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="usage">
 <h1><a class="toc-backref" href="#id1">Usage</a><a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
@@ -108,19 +108,19 @@
 </div>
 <div class="section" id="as-a-pre-commit-hook">
 <h2><a class="toc-backref" href="#id4">As a pre-commit hook:</a><a class="headerlink" href="#as-a-pre-commit-hook" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="kn">import</span> <span class="nn">git_lint</span>
 <span class="n">git_lint</span><span class="o">.</span><span class="n">run_precommit</span><span class="p">(</span><span class="n">staging</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">timestamps</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Install this file in your project&#8217;s <tt class="docutils literal"><span class="pre">.git/hooks/pre-commit</span></tt>, and set
-the file&#8217;s executable flag to <tt class="docutils literal"><span class="pre">true</span></tt>:</p>
-<div class="highlight-shell"><div class="highlight"><pre>chmod +x pre-commit
+<p>Install this file in your project&#8217;s <code class="docutils literal"><span class="pre">.git/hooks/pre-commit</span></code>, and set
+the file&#8217;s executable flag to <code class="docutils literal"><span class="pre">true</span></code>:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>chmod +x pre-commit
 </pre></div>
 </div>
-<p>Please see the <em class="xref std std-ref">api</em> for more details on options taken by the
-<tt class="docutils literal"><span class="pre">run_precommit()</span></tt> and <tt class="docutils literal"><span class="pre">run_gitlint</span></tt> commands.</p>
-<p>There is an example <tt class="docutils literal"><span class="pre">pre-commit</span></tt> script shipped with <tt class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></tt>.</p>
+<p>Please see the <span class="xref std std-ref">api</span> for more details on options taken by the
+<code class="docutils literal"><span class="pre">run_precommit()</span></code> and <code class="docutils literal"><span class="pre">run_gitlint</span></code> commands.</p>
+<p>There is an example <code class="docutils literal"><span class="pre">pre-commit</span></code> script shipped with <code class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></code>.</p>
 </div>
 </div>
 
@@ -128,7 +128,7 @@ the file&#8217;s executable flag to <tt class="docutils literal"><span class="pr
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -146,29 +146,28 @@ the file&#8217;s executable flag to <tt class="docutils literal"><span class="pr
   <h4>Next topic</h4>
   <p class="topless"><a href="contributing.html"
                         title="next chapter">Contributing</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="sources/usage.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="sources/usage.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -183,12 +182,12 @@ the file&#8217;s executable flag to <tt class="docutils literal"><span class="pr
         <li class="right" >
           <a href="installation.html" title="Installation"
              >previous</a> |</li>
-        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
     </div>
   </body>
 </html>

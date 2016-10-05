@@ -6,9 +6,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>git-lint(1) &mdash; Git Lint 0.0.4 documentation</title>
+    <title>git-lint(1) &#8212; Git Lint 0.0.4 documentation</title>
     
-    <link rel="stylesheet" href="static/default.css" type="text/css" />
+    <link rel="stylesheet" href="static/classic.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -25,8 +25,8 @@
     <script type="text/javascript" src="static/doctools.js"></script>
     <link rel="top" title="Git Lint 0.0.4 documentation" href="index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -35,14 +35,14 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="git-lint-1">
 <h1>git-lint(1)<a class="headerlink" href="#git-lint-1" title="Permalink to this headline">¶</a></h1>
@@ -53,7 +53,7 @@
 <div class="section" id="synopsis">
 <h2>SYNOPSIS<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
 <p>[verse]
-<tt class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></tt> [&lt;options&gt;...] [&lt;files...&gt;]</p>
+<code class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></code> [&lt;options&gt;...] [&lt;files...&gt;]</p>
 </div>
 <div class="section" id="description">
 <h2>DESCRIPTION<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
@@ -106,13 +106,13 @@ the files currently in the staging area.</p>
 <p>By default, the output is that of all the linters specified, in the
 order in which they appear in the configuration file, followed by
 every file specified, sorted ASCIIbetically.  This order can be
-flipped (files first, then linters) with the <tt class="docutils literal"><span class="pre">--byfiles</span></tt> option.</p>
-<p><tt class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></tt> returns the maximal error code if any linters fail a
+flipped (files first, then linters) with the <code class="docutils literal"><span class="pre">--byfiles</span></code> option.</p>
+<p><code class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></code> returns the maximal error code if any linters fail a
 pass, or zero if they all succeed.</p>
 </div>
 <div class="section" id="configuration">
 <h2>CONFIGURATION<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></tt> uses a standard INI-style configuration file.  Aside from the
+<p><code class="docutils literal"><span class="pre">git</span> <span class="pre">lint</span></code> uses a standard INI-style configuration file.  Aside from the
 DEFAULT section, the name of each section is an alphanumeric token name for
 a linter, followed by configuration details for that linter.  Standard details
 are:</p>
@@ -122,7 +122,7 @@ are:</p>
 <li>match - A comma-separated list of extensions to match against the linter</li>
 <li>print - If true, will prefix each line of output from the linter with the filename</li>
 <li>condition - if &#8220;error&#8221;, the return code of the linter is the status of the pass.  If &#8220;output,&#8221; any output will result in a failure.</li>
-<li>comment - Text to include when running the <tt class="docutils literal"><span class="pre">--linters</span></tt> option</li>
+<li>comment - Text to include when running the <code class="docutils literal"><span class="pre">--linters</span></code> option</li>
 </ul>
 </div>
 </div>
@@ -131,7 +131,7 @@ are:</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -146,29 +146,28 @@ are:</p>
 </li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="sources/manual.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="sources/manual.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -177,12 +176,12 @@ are:</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">Git Lint 0.0.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Git Lint 0.0.4 documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Kenneth M. &#34;Elf&#34; Sternberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
     </div>
   </body>
 </html>
