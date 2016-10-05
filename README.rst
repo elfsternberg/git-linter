@@ -46,12 +46,23 @@ Linter Docs <https://elfsternberg.github.io/git-linter/index.html>`_.
 Install
 -------
 
+This *ought* to work:
+
     `pip install git-linter`
 
 You will need to copy the .git-lint configuration file to either your
 home directory or the repo`s base directory.  Edit the configuration
 file as needed.  You will also need any linters that you plan on
 running.
+
+As git-linter is still mostly alpha code, it might be better to install
+from source:
+
+    ``
+    git clone https://github.com/elfsternberg/git-linter
+    python setup.py install
+    ``
+    
 
 
 Features
