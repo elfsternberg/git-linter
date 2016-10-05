@@ -11,7 +11,7 @@ import gettext
 _ = gettext.gettext
 
 NAME = 'git-lint'
-VERSION = '0.0.4'
+VERSION = '0.0.6'
 
 
 def main():
