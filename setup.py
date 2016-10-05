@@ -39,7 +39,7 @@ test_requirements = [
 
 setup(
     name='git_linter',
-    version='0.0.4',
+    version='version='0.0.4'',
     description="A git command to lint everything in your workspace (or stage) that was changed since the last commit.",
     long_description=readme + '\n\n' + history,
     author='Kenneth M. "Elf" Sternberg',
