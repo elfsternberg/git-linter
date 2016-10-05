@@ -8,5 +8,5 @@ recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
-recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
+recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif *.1
 include docs/_build/man/git-lint.1
