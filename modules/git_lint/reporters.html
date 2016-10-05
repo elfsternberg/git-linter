@@ -54,26 +54,25 @@
 <span class="n">_</span> <span class="o">=</span> <span class="n">gettext</span><span class="o">.</span><span class="n">gettext</span>
 
 
-<div class="viewcode-block" id="base_file_cleaner"><a class="viewcode-back" href="../../git_lint.html#git_lint.reporters.base_file_cleaner">[docs]</a><span class="k">def</span> <span class="nf">base_file_cleaner</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">git_base</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span></div>
-
-
-<span class="c1"># ICK.  Mutation, references, and hidden assignment.</span>
-<div class="viewcode-block" id="group_by"><a class="viewcode-back" href="../../git_lint.html#git_lint.reporters.group_by">[docs]</a><span class="k">def</span> <span class="nf">group_by</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">field_id</span><span class="p">):</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">keys</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="n">field_id</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-            <span class="n">keys</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-            <span class="k">continue</span>
-        <span class="n">keys</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span>
-        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">keys</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
-    <span class="k">return</span> <span class="n">results</span></div>
-
-
 <div class="viewcode-block" id="print_report"><a class="viewcode-back" href="../../git_lint.html#git_lint.reporters.print_report">[docs]</a><span class="k">def</span> <span class="nf">print_report</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">unlintable_filenames</span><span class="p">,</span> <span class="n">cant_lint_filenames</span><span class="p">,</span>
                  <span class="n">broken_linter_names</span><span class="p">,</span> <span class="n">unfindable_filenames</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;bylinter&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}):</span>
+
+    <span class="k">def</span> <span class="nf">base_file_cleaner</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">git_base</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+
+    <span class="c1"># ICK.  Mutation, references, and hidden assignment.</span>
+    <span class="k">def</span> <span class="nf">group_by</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">field_id</span><span class="p">):</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="n">field_id</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">keys</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">keys</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">keys</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">results</span>
+
     <span class="n">sort_position</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">grouping</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Linter: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="s1">&#39;byfile&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>

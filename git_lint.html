@@ -111,24 +111,6 @@ return code and the output of the lint process.</p>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="git_lint.git_lint.find_config_file">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">find_config_file</code><span class="sig-paren">(</span><em>options</em>, <em>base</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/git_lint.html#find_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.find_config_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the configuration file from a prioritized list of locations.</p>
-<dl class="docutils">
-<dt>Locations are prioritized as:</dt>
-<dd><ol class="first last arabic simple">
-<li>From the command line. Fail if specified but not found</li>
-<li>The repository&#8217;s root directory, as the file .git-lint</li>
-<li>The repository&#8217;s root directory, as the file .git-lint/config</li>
-<li>The user&#8217;s home directory, as file .git-lint</li>
-<li>The user&#8217;s home directory, as the file .git-lint/config</li>
-</ol>
-</dd>
-</dl>
-<p>If no configuration file is found, this is an error.</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="git_lint.git_lint.get_filelist">
 <code class="descclassname">git_lint.git_lint.</code><code class="descname">get_filelist</code><span class="sig-paren">(</span><em>options</em>, <em>extras</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/git_lint.html#get_filelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_filelist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the list of files against which we&#8217;ll run the linters.</p>
@@ -162,11 +144,6 @@ return code and the output of the lint process.</p>
 <dl class="function">
 <dt id="git_lint.git_lint.get_shell_response">
 <code class="descclassname">git_lint.git_lint.</code><code class="descname">get_shell_response</code><span class="sig-paren">(</span><em>fullcmd</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/git_lint.html#get_shell_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_shell_response" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="git_lint.git_lint.get_working_linter_names">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">get_working_linter_names</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/git_lint.html#get_working_linter_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_working_linter_names" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -221,16 +198,6 @@ Help text, list of (long) options superseded by this one.</dd>
 </div>
 <div class="section" id="module-git_lint.reporters">
 <span id="git-lint-reporters-module"></span><h2>git_lint.reporters module<a class="headerlink" href="#module-git_lint.reporters" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="git_lint.reporters.base_file_cleaner">
-<code class="descclassname">git_lint.reporters.</code><code class="descname">base_file_cleaner</code><span class="sig-paren">(</span><em>files</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/reporters.html#base_file_cleaner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.base_file_cleaner" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="git_lint.reporters.group_by">
-<code class="descclassname">git_lint.reporters.</code><code class="descname">group_by</code><span class="sig-paren">(</span><em>iterable</em>, <em>field_id</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/reporters.html#group_by"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.group_by" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="function">
 <dt id="git_lint.reporters.print_help">
 <code class="descclassname">git_lint.reporters.</code><code class="descname">print_help</code><span class="sig-paren">(</span><em>options</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/reporters.html#print_help"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.reporters.print_help" title="Permalink to this definition">¶</a></dt>

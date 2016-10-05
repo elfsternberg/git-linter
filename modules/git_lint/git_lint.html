@@ -73,39 +73,6 @@
 <span class="c1">#                     |___/</span>
 
 
-<div class="viewcode-block" id="find_config_file"><a class="viewcode-back" href="../../git_lint.html#git_lint.git_lint.find_config_file">[docs]</a><span class="k">def</span> <span class="nf">find_config_file</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">base</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Returns the configuration file from a prioritized list of locations.</span>
-
-<span class="sd">    Locations are prioritized as:</span>
-<span class="sd">        1. From the command line. Fail if specified but not found</span>
-<span class="sd">        2. The repository&#39;s root directory, as the file .git-lint</span>
-<span class="sd">        3. The repository&#39;s root directory, as the file .git-lint/config</span>
-<span class="sd">        4. The user&#39;s home directory, as file .git-lint</span>
-<span class="sd">        5. The user&#39;s home directory, as the file .git-lint/config</span>
-
-<span class="sd">    If no configuration file is found, this is an error.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="s1">&#39;config&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span>
-        <span class="n">configpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">configpath</span><span class="p">):</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Configuration file not found: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">configpath</span>
-
-    <span class="n">home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;HOME&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">possibles</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;.git-lint&#39;</span><span class="p">),</span>
-                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;.git-lint/config&#39;</span><span class="p">)]</span> <span class="o">+</span> <span class="p">((</span><span class="n">home</span> <span class="ow">and</span> <span class="p">[</span>
-                     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="s1">&#39;.git-lint&#39;</span><span class="p">),</span>
-                     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="s1">&#39;.git-lint/config&#39;</span><span class="p">)])</span> <span class="ow">or</span> <span class="p">[])</span>
-
-    <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">possibles</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;No configuration file found, tried: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">possibles</span><span class="p">)))</span>
-
-    <span class="k">return</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
-
-
 <span class="c1"># (commandLineDictionary, repositoryLocation) -&gt; (configurationDictionary | exit)</span>
 <div class="viewcode-block" id="load_config"><a class="viewcode-back" href="../../git_lint.html#git_lint.git_lint.load_config">[docs]</a><span class="k">def</span> <span class="nf">load_config</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">base</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads the git-lint configuration file.</span>
@@ -119,6 +86,38 @@
 <span class="sd">    files for specific linters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="k">def</span> <span class="nf">find_config_file</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">base</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the configuration file from a prioritized list of locations.</span>
+<span class="sd">    </span>
+<span class="sd">        Locations are prioritized as:</span>
+<span class="sd">            1. From the command line. Fail if specified but not found</span>
+<span class="sd">            2. The repository&#39;s root directory, as the file .git-lint</span>
+<span class="sd">            3. The repository&#39;s root directory, as the file .git-lint/config</span>
+<span class="sd">            4. The user&#39;s home directory, as file .git-lint</span>
+<span class="sd">            5. The user&#39;s home directory, as the file .git-lint/config</span>
+<span class="sd">    </span>
+<span class="sd">        If no configuration file is found, this is an error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    
+        <span class="k">if</span> <span class="s1">&#39;config&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span>
+            <span class="n">configpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">configpath</span><span class="p">):</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Configuration file not found: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">configpath</span>
+    
+        <span class="n">home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;HOME&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">possibles</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;.git-lint&#39;</span><span class="p">),</span>
+                     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;.git-lint/config&#39;</span><span class="p">)]</span> <span class="o">+</span> <span class="p">((</span><span class="n">home</span> <span class="ow">and</span> <span class="p">[</span>
+                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="s1">&#39;.git-lint&#39;</span><span class="p">),</span>
+                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="s1">&#39;.git-lint/config&#39;</span><span class="p">)])</span> <span class="ow">or</span> <span class="p">[])</span>
+    
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">possibles</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;No configuration file found, tried: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">possibles</span><span class="p">)))</span>
+    
+        <span class="k">return</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
     <span class="n">Linter</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Linter&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;linter&#39;</span><span class="p">])</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">find_config_file</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
     <span class="n">configloader</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">SafeConfigParser</span><span class="p">()</span>
@@ -242,12 +241,12 @@
     <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">possibles</span><span class="p">)</span> <span class="ow">and</span> <span class="n">possibles</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="ow">or</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="get_working_linter_names"><a class="viewcode-back" href="../../git_lint.html#git_lint.git_lint.get_working_linter_names">[docs]</a><span class="k">def</span> <span class="nf">get_working_linter_names</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">config</span>
-            <span class="k">if</span> <span class="n">executable_exists</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">linter</span><span class="p">[</span><span class="s1">&#39;command&#39;</span><span class="p">],</span> <span class="n">i</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span></div>
-
-
 <div class="viewcode-block" id="get_linter_status"><a class="viewcode-back" href="../../git_lint.html#git_lint.git_lint.get_linter_status">[docs]</a><span class="k">def</span> <span class="nf">get_linter_status</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">get_working_linter_names</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">config</span>
+                <span class="k">if</span> <span class="n">executable_exists</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">linter</span><span class="p">[</span><span class="s1">&#39;command&#39;</span><span class="p">],</span> <span class="n">i</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+    
     <span class="n">working_linter_names</span> <span class="o">=</span> <span class="n">get_working_linter_names</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
     <span class="n">broken_linter_names</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">config</span><span class="p">])</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">working_linter_names</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">working_linter_names</span><span class="p">,</span> <span class="n">broken_linter_names</span></div>
