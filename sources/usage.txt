@@ -17,20 +17,8 @@ Options
 As a pre-commit hook:
 ---------------------
 
-.. code-block:: python
+There's a file, pre-commit, in the /bin directory with the project.  (Or you can download
+it from the github repository.)  Install it in you .git/hooks/pre-commit file, and
+chmod +x .git/hooks/pre-commit.
 
-    #!/usr/bin/env python
-    import git_lint
-    git_lint.run_precommit(staging = True, timestamps = True)
-
-Install this file in your project's ``.git/hooks/pre-commit``, and set
-the file's executable flag to ``true``:
-
-.. code-block:: shell
-
-    chmod +x pre-commit
-
-Please see the :ref:`api` for more details on options taken by the
-``run_precommit()`` and ``run_gitlint`` commands.
-
-There is an example ``pre-commit`` script shipped with ``git lint``.
+The pre-commit hook is *experimental*.  Please be careful with it.
