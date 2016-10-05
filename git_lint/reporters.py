@@ -5,26 +5,25 @@ import gettext
 _ = gettext.gettext
 
 
-def base_file_cleaner(files):
-    return [file.replace(git_base + '/', '', 1) for file in files]
-
-
-# ICK.  Mutation, references, and hidden assignment.
-def group_by(iterable, field_id):
-    results = []
-    keys = {}
-    for obj in iterable:
-        key = obj[field_id]
-        if key in keys:
-            keys[key].append(obj)
-            continue
-        keys[key] = [obj]
-        results.append((key, keys[key]))
-    return results
-
-
 def print_report(results, unlintable_filenames, cant_lint_filenames,
                  broken_linter_names, unfindable_filenames, options={'bylinter': True}):
+
+    def base_file_cleaner(files):
+        return [file.replace(git_base + '/', '', 1) for file in files]
+
+    # ICK.  Mutation, references, and hidden assignment.
+    def group_by(iterable, field_id):
+        results = []
+        keys = {}
+        for obj in iterable:
+            key = obj[field_id]
+            if key in keys:
+                keys[key].append(obj)
+                continue
+            keys[key] = [obj]
+            results.append((key, keys[key]))
+        return results
+
     sort_position = 1
     grouping = _('Linter: {}')
     if 'byfile' in options:
