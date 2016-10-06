@@ -1,4 +1,5 @@
 from __future__ import print_function
+from functools import reduce
 from .git_lint import load_config, run_linters, git_base
 import operator
 import gettext
