@@ -271,6 +271,11 @@ def get_filelist(options, extras):
 
         return check_for_conflicts(parse_stream([], stream))
 
+    def revision_list():
+        cmd = ['diff', '--name-only', '-z', options.get('revision')]
+        return [entry for entry in get_git_response(cmd).split(u'\x00')
+                if len(entry) > 0]
+
     def staging_list():
         """ Return the list of files added or modified to the stage """
 
@@ -302,6 +307,9 @@ def get_filelist(options, extras):
         working_directory_trans = base_file_filter
 
     file_list_generator = working_list
+    if 'revision' in options:
+        file_list_generator = revision_list
+        working_directory_trans = base_file_filter
     if 'all' in options:
         file_list_generator = all_list
     if 'staging' in options:
@@ -420,6 +428,9 @@ class Linters:
 
 
 def run_linters(options, config, extras=[]):
+    if 'pr' in options:
+        options.pop('pr')
+        options['revision'] = 'HEAD^..HEAD'
 
     def build_config_subset(keys):
         """ Returns a subset of the configuration, with only those linters mentioned in keys """
