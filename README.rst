@@ -41,8 +41,6 @@ Complete documentation for the project is available in the docs directory, or at
 Linter Docs <https://elfsternberg.github.io/git-linter/index.html>`_.
 
 
-
-    
 Install
 -------
 
@@ -63,8 +61,6 @@ from source:
     python setup.py install
     ``
     
-
-
 Features
 --------
 
@@ -90,6 +86,14 @@ Acknowledgements
 `Git lint` started life as a simple pre-commit hook.  Most of the changes since were
 inspired by Steve Pulec's `Why You Need a Git Pre-Commit Hook and Why Most Are Wrong <https://dzone.com/articles/why-your-need-git-pre-commit>`_, as well as just my own needs
 as a software developer.
+
+To do
+-----
+
+* The '-q' and '--quiet' arguments do not work.
+* Ought to be able to silence the "no linter found" message.
+* Ought to be able to configure '-q' and '--silence' commands in .git-lint/config file.
+* Ought to be able to override config file for above.
 
 
 Disclaimer
