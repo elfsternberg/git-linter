@@ -71,7 +71,7 @@ def cleanup_options(options, commandline):
     def longoptstogo(i):
         return i[1] + ((i[2] and '=') or '')
 
-    optstringsshort = ''.join([shortoptstogo(opt) for opt in options])
+    optstringsshort = ''.join([shortoptstogo(opt) for opt in options if opt[0]])
     optstringslong = [longoptstogo(opt) for opt in options]
     (chosen_options, filenames) = getopt.getopt(commandline[1:],
                                                 optstringsshort,

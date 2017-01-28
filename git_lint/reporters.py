@@ -64,8 +64,7 @@ def print_report(results, unlintable_filenames, cant_lint_filenames,
 def print_help(options, name):
     print(_('Usage: {} [options] [filenames]').format(name))
     for item in options:
-        print(' -{:<1}  --{:<12}  {}'.format(item[0], item[1], item[3]))
-
+        print(' {:<2}  --{:<12}  {}'.format((item[0] and ('-' + item[0])) or '', item[1], item[3]))
 
 def print_version(name, version):
     print(_('{} {} Copyright (c) 2009, 2016 Kennth M. "Elf" Sternberg').format(name, version))
