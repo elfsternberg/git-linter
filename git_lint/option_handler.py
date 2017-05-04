@@ -12,8 +12,7 @@ except:  # noqa: F401
 
 
 Option = namedtuple('Option', ['short', 'long', 'takes', 'help', 'conflicts'])  # type: str, str, str, str, List[str]
-
-Arguments = namedtuple('Arguments', ['arguments', 'filenames', 'excluded'])  # type: List[str], List[str], List[str]
+Arguments = namedtuple('Arguments', ['arguments', 'filenames', 'excluded'])  # type: Dict[str, str], List[str], List[str]
 
 # This was a lot shorter and smarter in Hy...
 
@@ -36,8 +35,14 @@ def cleanup_options(options, commandline):
     :param List(Tuple (string, string, boolean, string, List(string))) options,
         The table of options: One-letter option, long option, takes arguments,
         Help text, list of (long) options superseded by this one.
+
     : param List(strings) commandline
         The arguments as received by the start-up process
+
+    : returns List(strings), List(strings), List(strings)
+        The longopt dictionary of arguments and associated values (if any)
+        The list of filenames left after argument processing
+        The longopt list of arguments that were excluded by argument precedence
     """
 
     def make_option_streamliner(options):
