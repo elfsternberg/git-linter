@@ -9,10 +9,17 @@ import re
 import subprocess
 import sys
 import pprint
+
 try:
     import configparser
 except ImportError as e:
     import ConfigParser as configparser
+
+try:  # noqa: F401
+    from typing import Dict, List, Text, Any, Optional, Union, Callable, Tuple  # noqa: F401
+except:  # noqa: F401
+    pass  # noqa: F401
+    
 
 _ = gettext.gettext
 
@@ -167,25 +174,23 @@ class MatchFilter:
 #  \___|_||_\___\__|_\_\ |_|_|_||_\__\___|_| /__/
 #
 
-def executable_exists(script, label):
-    if not len(script):
-        sys.exit(
-            _('Syntax error in command configuration for {} ').format(label))
+def linter_exists(linter, label):
+    if not len(linter):
+        sys.exit(_('Syntax error in linter configuration for {} ').format(label))
 
-    scriptname = script.split(' ').pop(0)
-    if not len(scriptname):
-        sys.exit(
-            _('Syntax error in command configuration for {} ').format(label))
+    lintername = linter.split(' ').pop(0)
+    if not len(lintername):
+        sys.exit(_('Syntax error in linter configuration for {} ').format(label))
 
     def is_executable(path):
         return os.path.exists(path) and os.access(path, os.X_OK)
 
-    if scriptname.startswith('/'):
-        return (is_executable(scriptname) and scriptname) or None
+    if lintername.startswith('/'):
+        return (is_executable(lintername) and lintername) or None
 
     # shutil.which() doesn't appear until Python 3, darnit.
     possibles = [path for path in
-                 [os.path.join(path, scriptname)
+                 [os.path.join(path, lintername)
                   for path in os.environ.get('PATH').split(':')]
                  if is_executable(path)]
 
@@ -193,10 +198,9 @@ def executable_exists(script, label):
 
 
 def get_linter_status(config):
-
     def get_working_linter_names(config):
         return [i.name for i in config
-                if executable_exists(i.linter['command'], i.name)]
+                if linter_exists(i.linter['command'], i.name)]
     
     working_linter_names = get_working_linter_names(config)
     broken_linter_names = (set([i.name for i in config]) - set(working_linter_names))
@@ -440,7 +444,6 @@ def run_linters(options, config, extras=[]):
     all_filenames, unfindable_filenames = get_filelist(options, extras)
 
     is_lintable = MatchFilter(config)
-
     lintable_filenames = set([filename for filename in all_filenames
                               if is_lintable(filename)])
 
@@ -450,7 +453,6 @@ def run_linters(options, config, extras=[]):
 
     cant_lint_filter = MatchFilter(build_config_subset(
         broken_linter_names))
-
     cant_lint_filenames = [filename for filename in lintable_filenames
                            if cant_lint_filter(filename)]
 

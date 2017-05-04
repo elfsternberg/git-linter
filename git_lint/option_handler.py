@@ -2,7 +2,18 @@
 # Author: Elf M. Sternberg
 
 from functools import reduce
+from collections import namedtuple
 import getopt
+
+try:  # noqa: F401
+    from typing import Dict, List, Text, Any, Optional, Union, Callable, Tuple  # noqa: F401
+except:  # noqa: F401
+    pass  # noqa: F401
+
+
+Option = namedtuple('Option', ['short', 'long', 'takes', 'help', 'conflicts'])  # type: str, str, str, str, List[str]
+
+Arguments = namedtuple('Arguments', ['arguments', 'filenames', 'excluded'])  # type: List[str], List[str], List[str]
 
 # This was a lot shorter and smarter in Hy...
 
@@ -17,6 +28,7 @@ import getopt
 
 
 def cleanup_options(options, commandline):
+    # type: (List[Option], List[str]) -> Arguments
     """Takes a table of options and the commandline, and returns a
        dictionary of those options that appear on the commandline
        along with any extra arguments.
@@ -29,36 +41,39 @@ def cleanup_options(options, commandline):
     """
 
     def make_option_streamliner(options):
+        # type: (List[Option]) -> Callable[[Dict[str, str], Option], Dict[str, str]]
 
         """Takes a list of option tuples, and returns a function that takes
             the output of getopt and reduces it to the longopt key and
             associated values as a dictionary.
         """
 
-        fullset = {}
+        fullset = {}  # type: Dict[str, str]
         for option in options:
-            if option[1]:
-                fullset['--' + option[1]] = option[1]
-                if option[0]:
-                    fullset['-' + option[0]] = option[1]
+            if option.long:
+                fullset['--' + option.long] = option.long
+                if option.short:
+                    fullset['-' + option.short] = option.long
 
         def streamliner(acc, it):
+            # type: (Dict[str, str], Option) -> Dict[str, str]
             acc[fullset[it[0]]] = it[1]
             return acc
 
         return streamliner
 
     def remove_conflicted_options(options, request):
+        # type: (List[Option], Dict[str, str]) -> Tuple[List[str], List[str]]
         """Takes our list of option tuples, and a cleaned copy of what was
             requested from getopt, and returns a copy of the request
             without any options that are marked as superseded, along with
             the list of superseded options
         """
-        def get_excluded_keys(memo, opt):
-            return memo + ((len(opt) > 4 and opt[4]) or [])
+        def get_excluded_keys(memo, option):
+            return memo + option.conflicts
 
         keys = request.keys()
-        marked = [option for option in options if option[1] in keys]
+        marked = [option for option in options if option.long in keys]
         exclude = reduce(get_excluded_keys, marked, [])
         excluded = [key for key in keys if key in exclude]
         cleaned = {key: request[key] for key in keys
@@ -66,12 +81,12 @@ def cleanup_options(options, commandline):
         return (cleaned, excluded)
 
     def shortoptstogo(i):
-        return i[0] + ((i[2] and ':') or '')
+        return i.short + ((i.takes and ':') or '')
 
     def longoptstogo(i):
-        return i[1] + ((i[2] and '=') or '')
+        return i.long + ((i.takes and '=') or '')
 
-    optstringsshort = ''.join([shortoptstogo(opt) for opt in options if opt[0]])
+    optstringsshort = ''.join([shortoptstogo(opt) for opt in options if opt.short])
     optstringslong = [longoptstogo(opt) for opt in options]
     (chosen_options, filenames) = getopt.getopt(commandline[1:],
                                                 optstringsshort,
@@ -84,4 +99,4 @@ def cleanup_options(options, commandline):
     (ret, excluded) = remove_conflicted_options(
         options, reduce(streamline_options, chosen_options, {}))
 
-    return (ret, filenames, excluded)
+    return Arguments(ret, filenames, excluded)
