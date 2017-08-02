@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>git_lint.reporters &#8212; Git Lint 0.0.6 documentation</title>
+    <title>git_lint.reporters &#8212; Git Lint 0.0.7 documentation</title>
     
     <link rel="stylesheet" href="../../static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.0.6',
+        VERSION:     '0.0.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../static/jquery.js"></script>
     <script type="text/javascript" src="../../static/underscore.js"></script>
     <script type="text/javascript" src="../../static/doctools.js"></script>
-    <link rel="top" title="Git Lint 0.0.6 documentation" href="../../index.html" />
+    <link rel="top" title="Git Lint 0.0.7 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../static/custom.css" type="text/css" />
@@ -42,6 +42,7 @@
             
   <h1>Source code for git_lint.reporters</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
 <span class="kn">from</span> <span class="nn">.git_lint</span> <span class="k">import</span> <span class="n">load_config</span><span class="p">,</span> <span class="n">run_linters</span><span class="p">,</span> <span class="n">git_base</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">import</span> <span class="nn">gettext</span>
@@ -106,7 +107,7 @@
 <div class="viewcode-block" id="print_help"><a class="viewcode-back" href="../../git_lint.html#git_lint.reporters.print_help">[docs]</a><span class="k">def</span> <span class="nf">print_help</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Usage: </span><span class="si">{}</span><span class="s1"> [options] [filenames]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; -</span><span class="si">{:&lt;1}</span><span class="s1">  --</span><span class="si">{:&lt;12}</span><span class="s1">  </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; </span><span class="si">{:&lt;2}</span><span class="s1">  --</span><span class="si">{:&lt;12}</span><span class="s1">  </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span></div>
 
 
 <div class="viewcode-block" id="print_version"><a class="viewcode-back" href="../../git_lint.html#git_lint.reporters.print_version">[docs]</a><span class="k">def</span> <span class="nf">print_version</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>

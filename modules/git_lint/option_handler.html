@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>git_lint.option_handler &#8212; Git Lint 0.0.6 documentation</title>
+    <title>git_lint.option_handler &#8212; Git Lint 0.0.7 documentation</title>
     
     <link rel="stylesheet" href="../../static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.0.6',
+        VERSION:     '0.0.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../static/jquery.js"></script>
     <script type="text/javascript" src="../../static/underscore.js"></script>
     <script type="text/javascript" src="../../static/doctools.js"></script>
-    <link rel="top" title="Git Lint 0.0.6 documentation" href="../../index.html" />
+    <link rel="top" title="Git Lint 0.0.7 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../static/custom.css" type="text/css" />
@@ -45,7 +45,17 @@
 <span class="c1"># Author: Elf M. Sternberg</span>
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
 <span class="kn">import</span> <span class="nn">getopt</span>
+
+<span class="k">try</span><span class="p">:</span>  <span class="c1"># noqa: F401</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span>  <span class="c1"># noqa: F401</span>
+<span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: F401</span>
+    <span class="k">pass</span>  <span class="c1"># noqa: F401</span>
+
+
+<span class="n">Option</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Option&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;short&#39;</span><span class="p">,</span> <span class="s1">&#39;long&#39;</span><span class="p">,</span> <span class="s1">&#39;takes&#39;</span><span class="p">,</span> <span class="s1">&#39;help&#39;</span><span class="p">,</span> <span class="s1">&#39;conflicts&#39;</span><span class="p">])</span>  <span class="c1"># type: str, str, str, str, List[str]</span>
+<span class="n">Arguments</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Arguments&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">,</span> <span class="s1">&#39;filenames&#39;</span><span class="p">,</span> <span class="s1">&#39;excluded&#39;</span><span class="p">])</span>  <span class="c1"># type: Dict[str, str], List[str], List[str]</span>
 
 <span class="c1"># This was a lot shorter and smarter in Hy...</span>
 
@@ -60,6 +70,7 @@
 
 
 <div class="viewcode-block" id="cleanup_options"><a class="viewcode-back" href="../../git_lint.html#git_lint.option_handler.cleanup_options">[docs]</a><span class="k">def</span> <span class="nf">cleanup_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">commandline</span><span class="p">):</span>
+    <span class="c1"># type: (List[Option], List[str]) -&gt; Arguments</span>
     <span class="sd">&quot;&quot;&quot;Takes a table of options and the commandline, and returns a</span>
 <span class="sd">       dictionary of those options that appear on the commandline</span>
 <span class="sd">       along with any extra arguments.</span>
@@ -67,41 +78,50 @@
 <span class="sd">    :param List(Tuple (string, string, boolean, string, List(string))) options,</span>
 <span class="sd">        The table of options: One-letter option, long option, takes arguments,</span>
 <span class="sd">        Help text, list of (long) options superseded by this one.</span>
+
 <span class="sd">    : param List(strings) commandline</span>
 <span class="sd">        The arguments as received by the start-up process</span>
+
+<span class="sd">    : returns List(strings), List(strings), List(strings)</span>
+<span class="sd">        The longopt dictionary of arguments and associated values (if any)</span>
+<span class="sd">        The list of filenames left after argument processing</span>
+<span class="sd">        The longopt list of arguments that were excluded by argument precedence</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">make_option_streamliner</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+        <span class="c1"># type: (List[Option]) -&gt; Callable[[Dict[str, str], Option], Dict[str, str]]</span>
 
         <span class="sd">&quot;&quot;&quot;Takes a list of option tuples, and returns a function that takes</span>
 <span class="sd">            the output of getopt and reduces it to the longopt key and</span>
 <span class="sd">            associated values as a dictionary.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">fullset</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">fullset</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: Dict[str, str]</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-                <span class="n">fullset</span><span class="p">[</span><span class="s1">&#39;--&#39;</span> <span class="o">+</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                    <span class="n">fullset</span><span class="p">[</span><span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">long</span><span class="p">:</span>
+                <span class="n">fullset</span><span class="p">[</span><span class="s1">&#39;--&#39;</span> <span class="o">+</span> <span class="n">option</span><span class="o">.</span><span class="n">long</span><span class="p">]</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">long</span>
+                <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">short</span><span class="p">:</span>
+                    <span class="n">fullset</span><span class="p">[</span><span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">option</span><span class="o">.</span><span class="n">short</span><span class="p">]</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">long</span>
 
         <span class="k">def</span> <span class="nf">streamliner</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
+            <span class="c1"># type: (Dict[str, str], Option) -&gt; Dict[str, str]</span>
             <span class="n">acc</span><span class="p">[</span><span class="n">fullset</span><span class="p">[</span><span class="n">it</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">it</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">acc</span>
 
         <span class="k">return</span> <span class="n">streamliner</span>
 
     <span class="k">def</span> <span class="nf">remove_conflicted_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="c1"># type: (List[Option], Dict[str, str]) -&gt; Tuple[List[str], List[str]]</span>
         <span class="sd">&quot;&quot;&quot;Takes our list of option tuples, and a cleaned copy of what was</span>
 <span class="sd">            requested from getopt, and returns a copy of the request</span>
 <span class="sd">            without any options that are marked as superseded, along with</span>
 <span class="sd">            the list of superseded options</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">get_excluded_keys</span><span class="p">(</span><span class="n">memo</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">memo</span> <span class="o">+</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">opt</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="k">def</span> <span class="nf">get_excluded_keys</span><span class="p">(</span><span class="n">memo</span><span class="p">,</span> <span class="n">option</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">memo</span> <span class="o">+</span> <span class="n">option</span><span class="o">.</span><span class="n">conflicts</span>
 
         <span class="n">keys</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-        <span class="n">marked</span> <span class="o">=</span> <span class="p">[</span><span class="n">option</span> <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span> <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
+        <span class="n">marked</span> <span class="o">=</span> <span class="p">[</span><span class="n">option</span> <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span> <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">long</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
         <span class="n">exclude</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">get_excluded_keys</span><span class="p">,</span> <span class="n">marked</span><span class="p">,</span> <span class="p">[])</span>
         <span class="n">excluded</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">]</span>
         <span class="n">cleaned</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">request</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span>
@@ -109,12 +129,12 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">cleaned</span><span class="p">,</span> <span class="n">excluded</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">shortoptstogo</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">i</span><span class="o">.</span><span class="n">short</span> <span class="o">+</span> <span class="p">((</span><span class="n">i</span><span class="o">.</span><span class="n">takes</span> <span class="ow">and</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">longoptstogo</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">i</span><span class="o">.</span><span class="n">long</span> <span class="o">+</span> <span class="p">((</span><span class="n">i</span><span class="o">.</span><span class="n">takes</span> <span class="ow">and</span> <span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-    <span class="n">optstringsshort</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">shortoptstogo</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="p">])</span>
+    <span class="n">optstringsshort</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">shortoptstogo</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span> <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">short</span><span class="p">])</span>
     <span class="n">optstringslong</span> <span class="o">=</span> <span class="p">[</span><span class="n">longoptstogo</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="p">]</span>
     <span class="p">(</span><span class="n">chosen_options</span><span class="p">,</span> <span class="n">filenames</span><span class="p">)</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">getopt</span><span class="p">(</span><span class="n">commandline</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
                                                 <span class="n">optstringsshort</span><span class="p">,</span>
@@ -127,7 +147,7 @@
     <span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">excluded</span><span class="p">)</span> <span class="o">=</span> <span class="n">remove_conflicted_options</span><span class="p">(</span>
         <span class="n">options</span><span class="p">,</span> <span class="n">reduce</span><span class="p">(</span><span class="n">streamline_options</span><span class="p">,</span> <span class="n">chosen_options</span><span class="p">,</span> <span class="p">{}))</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">excluded</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">Arguments</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">excluded</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

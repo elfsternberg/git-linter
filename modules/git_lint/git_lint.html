@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>git_lint.git_lint &#8212; Git Lint 0.0.6 documentation</title>
+    <title>git_lint.git_lint &#8212; Git Lint 0.0.7 documentation</title>
     
     <link rel="stylesheet" href="../../static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.0.6',
+        VERSION:     '0.0.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../static/jquery.js"></script>
     <script type="text/javascript" src="../../static/underscore.js"></script>
     <script type="text/javascript" src="../../static/doctools.js"></script>
-    <link rel="top" title="Git Lint 0.0.6 documentation" href="../../index.html" />
+    <link rel="top" title="Git Lint 0.0.7 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../static/custom.css" type="text/css" />
@@ -52,10 +52,17 @@
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">pprint</span>
+
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">configparser</span>
 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">ConfigParser</span> <span class="k">as</span> <span class="nn">configparser</span>
+
+<span class="k">try</span><span class="p">:</span>  <span class="c1"># noqa: F401</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span>  <span class="c1"># noqa: F401</span>
+<span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: F401</span>
+    <span class="k">pass</span>  <span class="c1"># noqa: F401</span>
+
 
 <span class="n">_</span> <span class="o">=</span> <span class="n">gettext</span><span class="o">.</span><span class="n">gettext</span>
 
@@ -82,36 +89,36 @@
 
     <span class="k">def</span> <span class="nf">find_config_file</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">base</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns the configuration file from a prioritized list of locations.</span>
-<span class="sd">    </span>
+
 <span class="sd">        Locations are prioritized as:</span>
 <span class="sd">            1. From the command line. Fail if specified but not found</span>
 <span class="sd">            2. The repository&#39;s root directory, as the file .git-lint</span>
 <span class="sd">            3. The repository&#39;s root directory, as the file .git-lint/config</span>
 <span class="sd">            4. The user&#39;s home directory, as file .git-lint</span>
 <span class="sd">            5. The user&#39;s home directory, as the file .git-lint/config</span>
-<span class="sd">    </span>
+
 <span class="sd">        If no configuration file is found, this is an error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-    
+
         <span class="k">if</span> <span class="s1">&#39;config&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span>
             <span class="n">configpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">configpath</span><span class="p">):</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Configuration file not found: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">configpath</span>
-    
+
         <span class="n">home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;HOME&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">possibles</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;.git-lint&#39;</span><span class="p">),</span>
                      <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;.git-lint/config&#39;</span><span class="p">)]</span> <span class="o">+</span> <span class="p">((</span><span class="n">home</span> <span class="ow">and</span> <span class="p">[</span>
                          <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="s1">&#39;.git-lint&#39;</span><span class="p">),</span>
                          <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="s1">&#39;.git-lint/config&#39;</span><span class="p">)])</span> <span class="ow">or</span> <span class="p">[])</span>
-    
+
         <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">possibles</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;No configuration file found, tried: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">possibles</span><span class="p">)))</span>
-    
+
         <span class="k">return</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    
+
     <span class="n">Linter</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Linter&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;linter&#39;</span><span class="p">])</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">find_config_file</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
     <span class="n">configloader</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">SafeConfigParser</span><span class="p">()</span>
@@ -210,25 +217,23 @@
 <span class="c1">#  \___|_||_\___\__|_\_\ |_|_|_||_\__\___|_| /__/</span>
 <span class="c1">#</span>
 
-<div class="viewcode-block" id="executable_exists"><a class="viewcode-back" href="../../git_lint.html#git_lint.git_lint.executable_exists">[docs]</a><span class="k">def</span> <span class="nf">executable_exists</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">script</span><span class="p">):</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
-            <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Syntax error in command configuration for </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+<div class="viewcode-block" id="linter_exists"><a class="viewcode-back" href="../../git_lint.html#git_lint.git_lint.linter_exists">[docs]</a><span class="k">def</span> <span class="nf">linter_exists</span><span class="p">(</span><span class="n">linter</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">linter</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Syntax error in linter configuration for </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
 
-    <span class="n">scriptname</span> <span class="o">=</span> <span class="n">script</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">scriptname</span><span class="p">):</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
-            <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Syntax error in command configuration for </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+    <span class="n">lintername</span> <span class="o">=</span> <span class="n">linter</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">lintername</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Syntax error in linter configuration for </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">is_executable</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">scriptname</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">is_executable</span><span class="p">(</span><span class="n">scriptname</span><span class="p">)</span> <span class="ow">and</span> <span class="n">scriptname</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">lintername</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">is_executable</span><span class="p">(</span><span class="n">lintername</span><span class="p">)</span> <span class="ow">and</span> <span class="n">lintername</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
 
     <span class="c1"># shutil.which() doesn&#39;t appear until Python 3, darnit.</span>
     <span class="n">possibles</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span>
-                 <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">scriptname</span><span class="p">)</span>
+                 <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">lintername</span><span class="p">)</span>
                   <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PATH&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)]</span>
                  <span class="k">if</span> <span class="n">is_executable</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span>
 
@@ -236,11 +241,10 @@
 
 
 <div class="viewcode-block" id="get_linter_status"><a class="viewcode-back" href="../../git_lint.html#git_lint.git_lint.get_linter_status">[docs]</a><span class="k">def</span> <span class="nf">get_linter_status</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
-
     <span class="k">def</span> <span class="nf">get_working_linter_names</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">config</span>
-                <span class="k">if</span> <span class="n">executable_exists</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">linter</span><span class="p">[</span><span class="s1">&#39;command&#39;</span><span class="p">],</span> <span class="n">i</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
-    
+                <span class="k">if</span> <span class="n">linter_exists</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">linter</span><span class="p">[</span><span class="s1">&#39;command&#39;</span><span class="p">],</span> <span class="n">i</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+
     <span class="n">working_linter_names</span> <span class="o">=</span> <span class="n">get_working_linter_names</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
     <span class="n">broken_linter_names</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">config</span><span class="p">])</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">working_linter_names</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">working_linter_names</span><span class="p">,</span> <span class="n">broken_linter_names</span></div>
@@ -314,6 +318,11 @@
 
         <span class="k">return</span> <span class="n">check_for_conflicts</span><span class="p">(</span><span class="n">parse_stream</span><span class="p">([],</span> <span class="n">stream</span><span class="p">))</span>
 
+    <span class="k">def</span> <span class="nf">revision_list</span><span class="p">():</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;diff&#39;</span><span class="p">,</span> <span class="s1">&#39;--name-only&#39;</span><span class="p">,</span> <span class="s1">&#39;-z&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;revision&#39;</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">get_git_response</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">u&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">staging_list</span><span class="p">():</span>
         <span class="sd">&quot;&quot;&quot; Return the list of files added or modified to the stage &quot;&quot;&quot;</span>
 
@@ -345,6 +354,9 @@
         <span class="n">working_directory_trans</span> <span class="o">=</span> <span class="n">base_file_filter</span>
 
     <span class="n">file_list_generator</span> <span class="o">=</span> <span class="n">working_list</span>
+    <span class="k">if</span> <span class="s1">&#39;revision&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">file_list_generator</span> <span class="o">=</span> <span class="n">revision_list</span>
+        <span class="n">working_directory_trans</span> <span class="o">=</span> <span class="n">base_file_filter</span>
     <span class="k">if</span> <span class="s1">&#39;all&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
         <span class="n">file_list_generator</span> <span class="o">=</span> <span class="n">all_list</span>
     <span class="k">if</span> <span class="s1">&#39;staging&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
@@ -463,6 +475,9 @@
 
 
 <div class="viewcode-block" id="run_linters"><a class="viewcode-back" href="../../git_lint.html#git_lint.git_lint.run_linters">[docs]</a><span class="k">def</span> <span class="nf">run_linters</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">extras</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="k">if</span> <span class="s1">&#39;pr&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;pr&#39;</span><span class="p">)</span>
+        <span class="n">options</span><span class="p">[</span><span class="s1">&#39;revision&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;HEAD^..HEAD&#39;</span>
 
     <span class="k">def</span> <span class="nf">build_config_subset</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a subset of the configuration, with only those linters mentioned in keys &quot;&quot;&quot;</span>
@@ -472,17 +487,25 @@
     <span class="n">all_filenames</span><span class="p">,</span> <span class="n">unfindable_filenames</span> <span class="o">=</span> <span class="n">get_filelist</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">extras</span><span class="p">)</span>
 
     <span class="n">is_lintable</span> <span class="o">=</span> <span class="n">MatchFilter</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-
     <span class="n">lintable_filenames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">all_filenames</span>
                               <span class="k">if</span> <span class="n">is_lintable</span><span class="p">(</span><span class="n">filename</span><span class="p">)])</span>
 
     <span class="n">unlintable_filenames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_filenames</span><span class="p">)</span> <span class="o">-</span> <span class="n">lintable_filenames</span>
 
+    <span class="c1"># Filter the linter config down to the selected ones.</span>
+    <span class="k">if</span> <span class="s1">&#39;only&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">[</span><span class="n">linter</span> <span class="k">for</span> <span class="n">linter</span> <span class="ow">in</span> <span class="n">config</span>
+                  <span class="k">if</span> <span class="n">linter</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;only&#39;</span><span class="p">]]</span>
+    <span class="k">elif</span> <span class="s1">&#39;exclude&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">[</span><span class="n">linter</span> <span class="k">for</span> <span class="n">linter</span> <span class="ow">in</span> <span class="n">config</span>
+                  <span class="k">if</span> <span class="n">linter</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;exclude&#39;</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;No linters left to run! Be less strict with --only and --exclude.&#39;</span><span class="p">)</span>
+
     <span class="n">working_linter_names</span><span class="p">,</span> <span class="n">broken_linter_names</span> <span class="o">=</span> <span class="n">get_linter_status</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
     <span class="n">cant_lint_filter</span> <span class="o">=</span> <span class="n">MatchFilter</span><span class="p">(</span><span class="n">build_config_subset</span><span class="p">(</span>
         <span class="n">broken_linter_names</span><span class="p">))</span>
-
     <span class="n">cant_lint_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">lintable_filenames</span>
                            <span class="k">if</span> <span class="n">cant_lint_filter</span><span class="p">(</span><span class="n">filename</span><span class="p">)]</span>
 

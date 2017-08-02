@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>git_lint package &#8212; Git Lint 0.0.6 documentation</title>
+    <title>git_lint package &#8212; Git Lint 0.0.7 documentation</title>
     
     <link rel="stylesheet" href="static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.6',
+        VERSION:     '0.0.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="static/jquery.js"></script>
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="Git Lint 0.0.6 documentation" href="index.html" />
+    <link rel="top" title="Git Lint 0.0.7 documentation" href="index.html" />
    
   <link rel="stylesheet" href="static/custom.css" type="text/css" />
   
@@ -101,11 +101,6 @@ return code and the output of the lint process.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="git_lint.git_lint.executable_exists">
-<code class="descclassname">git_lint.git_lint.</code><code class="descname">executable_exists</code><span class="sig-paren">(</span><em>script</em>, <em>label</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/git_lint.html#executable_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.executable_exists" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="git_lint.git_lint.get_filelist">
 <code class="descclassname">git_lint.git_lint.</code><code class="descname">get_filelist</code><span class="sig-paren">(</span><em>options</em>, <em>extras</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/git_lint.html#get_filelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.get_filelist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the list of files against which we&#8217;ll run the linters.</p>
@@ -142,6 +137,11 @@ return code and the output of the lint process.</p>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="git_lint.git_lint.linter_exists">
+<code class="descclassname">git_lint.git_lint.</code><code class="descname">linter_exists</code><span class="sig-paren">(</span><em>linter</em>, <em>label</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/git_lint.html#linter_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.linter_exists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="git_lint.git_lint.load_config">
 <code class="descclassname">git_lint.git_lint.</code><code class="descname">load_config</code><span class="sig-paren">(</span><em>options</em>, <em>base</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/git_lint.html#load_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.git_lint.load_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads the git-lint configuration file.</p>
@@ -172,6 +172,66 @@ files for specific linters.</p>
 </div>
 <div class="section" id="module-git_lint.option_handler">
 <span id="git-lint-option-handler-module"></span><h2>git_lint.option_handler module<a class="headerlink" href="#module-git_lint.option_handler" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="git_lint.option_handler.Arguments">
+<em class="property">class </em><code class="descclassname">git_lint.option_handler.</code><code class="descname">Arguments</code><span class="sig-paren">(</span><em>arguments</em>, <em>filenames</em>, <em>excluded</em><span class="sig-paren">)</span><a class="headerlink" href="#git_lint.option_handler.Arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="git_lint.option_handler.Arguments.arguments">
+<code class="descname">arguments</code><a class="headerlink" href="#git_lint.option_handler.Arguments.arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="git_lint.option_handler.Arguments.excluded">
+<code class="descname">excluded</code><a class="headerlink" href="#git_lint.option_handler.Arguments.excluded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="git_lint.option_handler.Arguments.filenames">
+<code class="descname">filenames</code><a class="headerlink" href="#git_lint.option_handler.Arguments.filenames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="git_lint.option_handler.Option">
+<em class="property">class </em><code class="descclassname">git_lint.option_handler.</code><code class="descname">Option</code><span class="sig-paren">(</span><em>short</em>, <em>long</em>, <em>takes</em>, <em>help</em>, <em>conflicts</em><span class="sig-paren">)</span><a class="headerlink" href="#git_lint.option_handler.Option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="git_lint.option_handler.Option.conflicts">
+<code class="descname">conflicts</code><a class="headerlink" href="#git_lint.option_handler.Option.conflicts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="git_lint.option_handler.Option.help">
+<code class="descname">help</code><a class="headerlink" href="#git_lint.option_handler.Option.help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="git_lint.option_handler.Option.long">
+<code class="descname">long</code><a class="headerlink" href="#git_lint.option_handler.Option.long" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="git_lint.option_handler.Option.short">
+<code class="descname">short</code><a class="headerlink" href="#git_lint.option_handler.Option.short" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="git_lint.option_handler.Option.takes">
+<code class="descname">takes</code><a class="headerlink" href="#git_lint.option_handler.Option.takes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="git_lint.option_handler.cleanup_options">
 <code class="descclassname">git_lint.option_handler.</code><code class="descname">cleanup_options</code><span class="sig-paren">(</span><em>options</em>, <em>commandline</em><span class="sig-paren">)</span><a class="reference internal" href="modules/git_lint/option_handler.html#cleanup_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#git_lint.option_handler.cleanup_options" title="Permalink to this definition">¶</a></dt>
@@ -184,6 +244,10 @@ along with any extra arguments.</dd>
 Help text, list of (long) options superseded by this one.</dd>
 <dt>: param List(strings) commandline</dt>
 <dd>The arguments as received by the start-up process</dd>
+<dt>: returns List(strings), List(strings), List(strings)</dt>
+<dd>The longopt dictionary of arguments and associated values (if any)
+The list of filenames left after argument processing
+The longopt list of arguments that were excluded by argument precedence</dd>
 </dl>
 </dd></dl>
 
